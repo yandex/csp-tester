@@ -1,0 +1,123 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>CSP Tester's Popup</title>
+        <style>
+            body {
+                overflow-x: hidden;
+                font-family: sans-serif;
+                min-width: 600px;
+                font-size:1em;
+                margin:0;
+                padding:0;
+                color: #1a4780;
+            }
+            img {
+                margin: 5px;
+                border: 2px solid black;
+                vertical-align: middle;
+                width: 75px;
+                height: 75px;
+            }
+            input[type=text] {
+                width: 30em;
+            }
+            #header {
+                background-color: #cee6fa;
+                padding:0.5em;
+            }
+            #header h1 {
+                margin:0;
+            }
+            #content {
+                padding-left:0.5em;
+                background-color: #dcefff;
+            }
+            #status {
+                text-align: center;
+                padding:0.5em;
+                border-radius: 5px;
+                position: fixed;
+                left: 25%;
+                top: 40%;
+                background-color: #cee6fa;
+                opacity:0.8;
+                display: none;
+                font-size:1.8em;
+            }
+
+        </style>
+    </head>
+    <body>
+        <div id="header">
+            <h1>CSP Tester</h1>
+        </div>
+        <div id="content">
+        <table cellpadding="5" cellspacing="5" border="0">
+            <tr>
+                <td><a href="https://developer.chrome.com/extensions/match_patterns.html" target="_blank">URL Pattern</a></td>
+                <td>
+                    <input type="text" id="target" value="" tabindex="1" />
+                </td> 
+            </tr>
+            <tr>
+                <td><a href="http://www.w3.org/TR/CSP/#default-src" target="_blank">default-src</a></td>
+                <td><input type="text" name="default-src" id="default-src" value="" /></td>
+            </tr>
+            <tr>
+                <td><a href="http://www.w3.org/TR/CSP/#script-src" target="_blank">script-src</a></td>
+                <td><input type="text" name="script-src" id="script-src" value="" /></td>
+            </tr>
+            <tr>
+                <td><a href="http://www.w3.org/TR/CSP/#object-src" target="_blank">object-src</a></td>
+                <td><input type="text" name="object-src" id="object-src" value="" /></td>
+            </tr>
+            <tr>
+                <td><a href="http://www.w3.org/TR/CSP/#style-src" target="_blank">style-src</a></td>
+                <td><input type="text" name="style-src" id="style-src" value="" /></td>
+            </tr>
+            <tr>
+                <td><a href="http://www.w3.org/TR/CSP/#img-src" target="_blank">img-src</a></td>
+                <td><input type="text" name="img-src" id="img-src" value="" /></td>
+            </tr>
+            <tr>
+                <td><a href="http://www.w3.org/TR/CSP/#media-src" target="_blank">media-src</a></td>
+                <td><input type="text" name="media-src" id="media-src" value="" /></td>
+            </tr>
+            <tr>
+                <td><a href="http://www.w3.org/TR/CSP/#frame-src" target="_blank">frame-src</a></td>
+                <td><input type="text" name="frame-src" id="frame-src" value="" /></td>
+            </tr>
+            <tr>
+                <td><a href="http://www.w3.org/TR/CSP/#font-src" target="_blank">font-src</a></td>
+                <td><input type="text" name="font-src" id="font-src" value="" /></td>
+            </tr>
+            <tr>
+                <td><a href="http://www.w3.org/TR/CSP/#connect-src" target="_blank">connect-src</a></td>
+                <td><input type="text" name="connect-src" id="connect-src" value="" /></td>
+            </tr>
+            <tr>
+                <td><a href="http://www.w3.org/TR/CSP/#sandbox-optional" target="_blank">sandbox</a></td>
+                <td><input type="text" name="sandbox" id="sandbox" value="" /></td>
+            </tr>
+            <tr>
+                <td><a href="http://www.w3.org/TR/CSP/#report-uri" target="_blank">report-uri</a></td>
+                <td><input type="text" name="report-uri" id="report-uri" value="" /></td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    <input type="checkbox" id="state"  tabindex="3" /><label for="state">Active</label>
+                    <input type="checkbox" id="report_only"  tabindex="4" /><label for="report_only">Report Only</label>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    <input type="button" id="save" value="Save" />
+                    <input type="button" id="reset" value="Reset" />
+        </td></tr></table>
+        <div id="status"></div>
+        </div>
+        <script src="popup.js"></script>
+    </body>
+</html>
