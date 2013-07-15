@@ -2,8 +2,7 @@ var callback = function(details) {
     var csp_names = ['Content-Security-Policy', 'X-WebKit-CSP'];
     var csp_name = '';
     var csp_value = localStorage['policy'];
-    
-    for (var i; i<csp_names.length; i++) {
+    for (var i=0; i<csp_names.length; i++) {
         csp_name = csp_names[i];
         if (localStorage['report_only'] == 1) {
             csp_name += '-Report-Only';
