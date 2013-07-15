@@ -1,12 +1,15 @@
 var callback = function(details) {
-    var csp_name = 'Content-Security-Policy';
+    var csp_names = ['Content-Security-Policy', 'X-WebKit-CSP'];
+    var csp_name = '';
     var csp_value = localStorage['policy'];
-
-    if (localStorage['report_only'] == 1) {
-        csp_name = 'Content-Security-Policy-Report-Only';
+    
+    for (var i; i<csp_names.length; i++) {
+        csp_name = csp_names[i];
+        if (localStorage['report_only'] == 1) {
+            csp_name += '-Report-Only';
+        }
+        details.responseHeaders.push({name: csp_name, value: csp_value});
     }
-
-    details.responseHeaders.push({name: csp_name, value: csp_value});
     return {responseHeaders: details.responseHeaders};
 };
 
