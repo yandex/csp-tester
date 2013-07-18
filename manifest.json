@@ -12,5 +12,6 @@
         "scripts": ["background.js"],
         "persistent": true
     },
+    "options_page": "options.html",    
     "homepage_url": "https://github.com/oxdef/csp-tester"  
 }

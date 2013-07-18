@@ -1,0 +1,65 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>CSP Tester Options</title>
+        <style>
+            body {
+                overflow-x: hidden;
+                font-family: sans-serif;
+                min-width: 600px;
+                font-size:1em;
+                margin:0;
+                padding:0;
+                color: #1a4780;
+            }
+            #header {
+                background-color: #cee6fa;
+                padding:0.5em;
+            }
+            #header h1 {
+                margin:0;
+            }
+            #content {
+                padding-left:0.5em;
+                background-color: #dcefff;
+            }
+            #status {
+                text-align: center;
+                padding:0.5em;
+                border-radius: 5px;
+                position: fixed;
+                left: 25%;
+                top: 40%;
+                background-color: #cee6fa;
+                opacity:0.8;
+                display: none;
+                font-size:1.8em;
+            }
+            table tr td.directive {
+                min-width: 6em;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="header">
+            <h1>CSP Tester Options</h1>
+        </div>
+        <div id="content">
+          <table cellpadding="5" cellspacing="5" border="0">
+              <tr><td>Policy HTTP headers</td></td>
+            <tr>
+                <td>
+                    <input type="checkbox" id="standard_header" /><label for="standard_header">Content-Security-Policy</label>
+                    <input type="checkbox" id="web_kit_header" /><label for="web_kit_header">X-WebKit-CSP</label>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <input type="button" id="save" value="Save" />
+        </td></tr></table>
+        <div id="status"></div>
+        </div>
+        <script src="options.js"></script>
+    </body>
+</html>

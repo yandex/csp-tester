@@ -1,5 +1,14 @@
 var callback = function(details) {
-    var csp_names = ['Content-Security-Policy', 'X-WebKit-CSP'];
+    var csp_names = ['Content-Security-Policy'];
+        
+    if (localStorage.getItem('standard_header') == 0) {
+        csp_names = [];
+    }
+    
+    if (localStorage.getItem('web_kit_header') == 1) {
+        csp_names.push('X-WebKit-CSP');
+    }
+    
     var csp_name = '';
     var csp_value = localStorage['policy'];
     for (var i=0; i<csp_names.length; i++) {
