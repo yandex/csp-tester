@@ -11,6 +11,15 @@ var callback = function(details) {
     
     var csp_name = '';
     var csp_value = localStorage['policy'];
+
+    details.responseHeaders.map(function(val, i, arr){
+        for (var j=0; j<csp_names.length; j++) {
+            if (val.name == csp_names[j]) {
+                arr.splice(i, 1);
+            }
+        }
+    });
+
     for (var i=0; i<csp_names.length; i++) {
         csp_name = csp_names[i];
         if (localStorage['report_only'] == 1) {
