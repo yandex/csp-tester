@@ -166,9 +166,6 @@ function switch2advanced() {
 
     for (var i=0;i<directives.length;i++) {
         tmp_value = document.getElementById(directives[i]).value.trim(); 
-        if (!tmp_value) {
-            continue;
-        }
         for (var j=0;j<keywords.length;j++) {
             if (document.getElementById(directives[i] + '-' + keywords[j]) 
                     && document.getElementById(directives[i] + '-' + keywords[j]).checked) {
@@ -176,7 +173,9 @@ function switch2advanced() {
                 tmp_value += " '" + keywords[j] + "'";
             }
         }
-        csp_value += directives[i] + ' ' + tmp_value + '; ';
+        if (tmp_value) {
+            csp_value += directives[i] + ' ' + tmp_value + '; ';
+        }
     }
     if (csp_value) {
         csp_value = csp_value.slice(0, csp_value.length - 2);
@@ -192,7 +191,6 @@ function switch2simple() {
     for (var i=0;i<directives.length;i++) {
         if (directives[i] in csp_chunks) {
             tmp_value = csp_chunks[directives[i]];
-
             for (var j=0;j<keywords.length;j++) {
                 if (tmp_value.indexOf("'"+keywords[j]+"'") > -1 
                         && document.getElementById(directives[i] + '-' + keywords[j])) {
@@ -200,7 +198,6 @@ function switch2simple() {
                     document.getElementById(directives[i] + '-' + keywords[j]).checked = true;
                 }
             }
-
             document.getElementById(directives[i]).value = tmp_value.trim();
         } else {
             document.getElementById(directives[i]).value = '';
