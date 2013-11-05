@@ -12,6 +12,8 @@ var directives = [
     'report-uri'
     ];
 
+var keywords = ['self', 'unsafe-inline', 'unsafe-eval'];
+
 // http://www.w3.org/TR/CSP/#parsing
 function parse_policy(policy) {
     var result = {};
@@ -33,6 +35,7 @@ function save_policy() {
     var policies = [];
     var csp_value = '';
     var csp_chunks = {};
+    var tmp_value = '';
     localStorage["target"] = document.getElementById("target").value;
 
     if (localStorage.getItem('mode') == 2) {
@@ -47,7 +50,15 @@ function save_policy() {
         }
     } else {
         for (var i=0;i<directives.length;i++) {
-            localStorage.setItem(directives[i], document.getElementById(directives[i]).value);
+            tmp_value = document.getElementById(directives[i]).value;
+            for (var j=0;j<keywords.length;j++) {
+                tmp_value = tmp_value.replace("'" + keywords[j] +"'", ''); 
+                if (document.getElementById(directives[i] + '-' + keywords[j]) 
+                        && document.getElementById(directives[i] + '-'+ keywords[j]).checked) {
+                    tmp_value += " '" + keywords[j] + "'";
+                }
+            }
+            localStorage.setItem(directives[i], tmp_value.trim());
             if (localStorage[directives[i]]) {
                 csp_value += directives[i] + ' ' + localStorage[directives[i]] + '; ';
             }
@@ -85,6 +96,8 @@ function save_policy() {
 }
 
 function load_policy() {
+    var tmp_value = '';
+
     if (localStorage.getItem("target")) {
         document.getElementById("target").value = localStorage.getItem("target");
     }
@@ -94,7 +107,15 @@ function load_policy() {
     }
     for (var i=0;i<directives.length;i++) {
         if (localStorage.getItem(directives[i])) {
-            document.getElementById(directives[i]).value = localStorage.getItem(directives[i]);
+            tmp_value = localStorage.getItem(directives[i]);
+            for (var j=0;j<keywords.length;j++) {
+                if (tmp_value.indexOf("'"+keywords[j]+"'") > -1 
+                        && document.getElementById(directives[i] + '-' + keywords[j])) {
+                    tmp_value = tmp_value.replace("'" + keywords[j] +"'", ''); 
+                    document.getElementById(directives[i] + '-' + keywords[j]).checked = true;
+                }
+            }
+            document.getElementById(directives[i]).value = tmp_value.trim();
         }
     }
 
@@ -141,12 +162,21 @@ function toggle_view() {
 function switch2advanced() {
     localStorage['mode'] = 2;
     var csp_value = '';
-    var tmp = '';
+    var tmp_value = '';
+
     for (var i=0;i<directives.length;i++) {
-        tmp = document.getElementById(directives[i]).value.trim(); 
-        if (tmp) {
-            csp_value += directives[i] + ' ' + tmp + '; ';
+        tmp_value = document.getElementById(directives[i]).value.trim(); 
+        if (!tmp_value) {
+            continue;
         }
+        for (var j=0;j<keywords.length;j++) {
+            if (document.getElementById(directives[i] + '-' + keywords[j]) 
+                    && document.getElementById(directives[i] + '-' + keywords[j]).checked) {
+                tmp_value = tmp_value.replace("'" + keywords[j] +"'", ''); 
+                tmp_value += " '" + keywords[j] + "'";
+            }
+        }
+        csp_value += directives[i] + ' ' + tmp_value + '; ';
     }
     if (csp_value) {
         csp_value = csp_value.slice(0, csp_value.length - 2);
@@ -158,9 +188,20 @@ function switch2advanced() {
 function switch2simple() {
     localStorage['mode'] = 1;
     var csp_chunks = parse_policy(document.getElementById("policy").value);
+    var tmp_value = '';
     for (var i=0;i<directives.length;i++) {
         if (directives[i] in csp_chunks) {
-            document.getElementById(directives[i]).value = csp_chunks[directives[i]];
+            tmp_value = csp_chunks[directives[i]];
+
+            for (var j=0;j<keywords.length;j++) {
+                if (tmp_value.indexOf("'"+keywords[j]+"'") > -1 
+                        && document.getElementById(directives[i] + '-' + keywords[j])) {
+                    tmp_value = tmp_value.replace("'" + keywords[j] +"'", ''); 
+                    document.getElementById(directives[i] + '-' + keywords[j]).checked = true;
+                }
+            }
+
+            document.getElementById(directives[i]).value = tmp_value.trim();
         } else {
             document.getElementById(directives[i]).value = '';
         }

@@ -21,7 +21,7 @@
                 height: 75px;
             }
             input[type=text] {
-                width: 30em;
+                width: 20em;
             }
             textarea {
                 width: 30em;
@@ -73,38 +73,47 @@
             <tr>
                 <td class="directive"><a href="http://www.w3.org/TR/CSP/#default-src" target="_blank">default-src</a></td>
                 <td><input type="text" name="default-src" id="default-src" value="" /></td>
+                <td nowrap="true"><input type="checkbox" name="default-src-self" id="default-src-self" value="" />&nbsp;<label for="default-src-self">self</label></td>
             </tr>
             <tr>
                 <td class="directive"><a href="http://www.w3.org/TR/CSP/#script-src" target="_blank">script-src</a></td>
                 <td><input type="text" name="script-src" id="script-src" value="" /></td>
-            </tr>
-            <tr>
-                <td class="directive"><a href="http://www.w3.org/TR/CSP/#object-src" target="_blank">object-src</a></td>
-                <td><input type="text" name="object-src" id="object-src" value="" /></td>
+                <td nowrap="true"><input type="checkbox" name="script-src-self" id="script-src-self" value="" />&nbsp;<label for="script-src-self">self</label>&nbsp;<input type="checkbox" name="script-src-unsafe-inline" id="script-src-unsafe-inline" value="" />&nbsp;<label for="script-src-unsafe-inline">unsafe-inline</label>&nbsp;<input type="checkbox" name="script-src-unsafe-eval" id="script-src-unsafe-eval" value="" />&nbsp;<label for="script-src-unsafe-eval">unsafe-eval</label></td>
             </tr>
             <tr>
                 <td class="directive"><a href="http://www.w3.org/TR/CSP/#style-src" target="_blank">style-src</a></td>
                 <td><input type="text" name="style-src" id="style-src" value="" /></td>
+                <td nowrap="true"><input type="checkbox" name="style-src-self" id="style-src-self" value="" />&nbsp;<label for="style-src-self">self</label>&nbsp;<input type="checkbox" name="style-src-unsafe-inline" id="style-src-unsafe-inline" value="" />&nbsp;<label for="style-src-unsafe-inline">unsafe-inline</label></td>
+            </tr>
+            <tr>
+                <td class="directive"><a href="http://www.w3.org/TR/CSP/#object-src" target="_blank">object-src</a></td>
+                <td><input type="text" name="object-src" id="object-src" value="" /></td>
+                <td nowrap="true"><input type="checkbox" name="object-src-self" id="object-src-self" value="" />&nbsp;<label for="object-src-self">self</label></td>
             </tr>
             <tr>
                 <td class="directive"><a href="http://www.w3.org/TR/CSP/#img-src" target="_blank">img-src</a></td>
                 <td><input type="text" name="img-src" id="img-src" value="" /></td>
+                <td nowrap="true"><input type="checkbox" name="img-src-self" id="img-src-self" value="" />&nbsp;<label for="img-src-self">self</label></td>
             </tr>
             <tr>
                 <td class="directive"><a href="http://www.w3.org/TR/CSP/#media-src" target="_blank">media-src</a></td>
                 <td><input type="text" name="media-src" id="media-src" value="" /></td>
+                <td nowrap="true"><input type="checkbox" name="media-src-self" id="media-src-self" value="" />&nbsp;<label for="media-src-self">self</label></td>
             </tr>
             <tr>
                 <td class="directive"><a href="http://www.w3.org/TR/CSP/#frame-src" target="_blank">frame-src</a></td>
                 <td><input type="text" name="frame-src" id="frame-src" value="" /></td>
+                <td nowrap="true"><input type="checkbox" name="frame-src-self" id="frame-src-self" value="" />&nbsp;<label for="frame-src-self">self</label></td>
             </tr>
             <tr>
                 <td class="directive"><a href="http://www.w3.org/TR/CSP/#font-src" target="_blank">font-src</a></td>
                 <td><input type="text" name="font-src" id="font-src" value="" /></td>
+                <td nowrap="true"><input type="checkbox" name="font-src-self" id="font-src-self" value="" />&nbsp;<label for="font-src-self">self</label></td>
             </tr>
             <tr>
                 <td class="directive"><a href="http://www.w3.org/TR/CSP/#connect-src" target="_blank">connect-src</a></td>
                 <td><input type="text" name="connect-src" id="connect-src" value="" /></td>
+                <td nowrap="true"><input type="checkbox" name="connect-src-self" id="connect-src-self" value="" />&nbsp;<label for="connect-src-self">self</label></td>
             </tr>
             <tr>
                 <td class="directive"><a href="http://www.w3.org/TR/CSP/#sandbox-optional" target="_blank">sandbox</a></td>
