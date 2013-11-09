@@ -2,7 +2,7 @@
     "manifest_version": 2,
     "name": "CSP Tester",
     "description": "This extension helps web masters to test web application behaviour with Content Security Policy ver. 1.0 implemented.",
-    "version": "1.0",
+    "version": "1.1",
     "permissions": [ "webRequest", "webRequestBlocking", "<all_urls>" ],
     "browser_action": {
         "default_icon": "icon16.png",

@@ -1,0 +1,70 @@
+body {
+    overflow-x: hidden;
+    font-family: sans-serif;
+    min-width: 600px;
+    font-size:1em;
+    margin:0;
+    padding:0;
+    color: #1a4780;
+}
+
+a {
+    color: #1a4780;
+    font-size:0.9em;
+}
+
+img {
+    margin: 5px;
+    border: 2px solid black;
+    vertical-align: middle;
+    width: 75px;
+    height: 75px;
+}
+
+input[type=button] {
+    font-size:0.9em;
+}
+
+input[type=text] {
+    width: 20em;
+}
+
+:invalid {
+    background-color: #fab9a2;
+}
+
+textarea {
+    width: 30em;
+    height: 10em;
+}
+
+#header {
+    background-color: #cee6fa;
+    padding:0.5em;
+}
+
+#header h1 {
+    margin:0;
+}
+
+#content {
+    padding-left:0.5em;
+    background-color: #dcefff;
+}
+
+#status {
+    text-align: center;
+    padding:0.5em;
+    border-radius: 5px;
+    position: fixed;
+    left: 25%;
+    top: 40%;
+    background-color: #cee6fa;
+    opacity:0.8;
+    display: none;
+    font-size:1.8em;
+}
+
+table tr td.directive {
+    min-width: 6em;
+}
