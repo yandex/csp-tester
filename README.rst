@@ -18,5 +18,7 @@ and install it a little bit geek way:
 #. Locate the extension file on your computer and drag the file onto the Extensions page
 #. Review the list of permissions in the dialogue that appears. If you would like to proceed, click Install
 
+To analyze CSP logs you can use `CSP Reporter <https://www.oxdef.info/csp-reporter>`__
+
 .. _CSP: http://www.w3.org/TR/CSP/ 
 .. _download: https://www.oxdef.info/downloads/csp-tester/
