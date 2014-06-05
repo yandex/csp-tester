@@ -19,7 +19,7 @@ Currently extension is not available in Chrome Web Store but you can install it 
 To verify functionality of CSP Tester:
 
 #. Open the extension window
-#. Add into the URL Pattern a regular expression for the site that you want to test, for example *://*.eff.org/*  (CSP Tester uses `Chrome Match Patterns <https://developer.chrome.com/extensions/match_patterns>`_)
+#. Add into the URL Pattern a regular expression for the site that you want to test, for example \*://\*.eff.org/*  (CSP Tester uses `Chrome Match Patterns <https://developer.chrome.com/extensions/match_patterns>`_)
 #. Tick the "self" checkbox, check "Active" and Save the changes
 #. Open the Developer Tools, navigate to the tested site such as http://eff.org
 #. Confirm a number of CSP violations reported in the Developer Tools Console as well as possible visual changes
