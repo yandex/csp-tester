@@ -9,12 +9,7 @@ with Content Security Policy (CSP_) ver. 1.0 implemented.
   
   CSP Tester version 1.1 screenshot
   
-Currently extension is not available in Chrome Web Store but you can install it in Developer Mode:
-
-#. Download_ the extension archive and unpack it into, e.g. ``/home/user/tools/csp-tester``
-#. Click the Chrome menu icon on the browser toolbar
-#. Select "Tools" then "Extensions". Enable "Developer mode" and click on "Load unpacked extension"
-#. Navigate to the extension directory on your computer and click "Open"
+You can install CSP Tester from `Chrome Web Store`__
 
 To verify functionality of CSP Tester:
 
@@ -28,3 +23,4 @@ To analyze CSP logs you can use `CSP Reporter <https://www.oxdef.info/csp-report
 
 .. _CSP: http://www.w3.org/TR/CSP/ 
 .. _Download: https://github.com/oxdef/csp-tester/archive/master.zip
+.. _Chrome Web Store: https://chrome.google.com/webstore/detail/csp-tester/ehmipebdmhlmikaopdfoinmcjhhfadlf
