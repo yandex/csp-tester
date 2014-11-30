@@ -9,7 +9,7 @@ with Content Security Policy (CSP_) ver. 1.0 implemented.
   
   CSP Tester version 1.1 screenshot
   
-You can install CSP Tester from `Chrome Web Store`__
+You can install CSP Tester from `Chrome Web Store`_
 
 To verify functionality of CSP Tester:
 
