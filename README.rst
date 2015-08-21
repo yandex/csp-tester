@@ -5,7 +5,7 @@ CSP Tester
 This extension helps web masters to test web application behaviour 
 with Content Security Policy (CSP_) ver. 1.0 implemented.
 
-.. figure:: https://www.oxdef.info/static/images/csp-tester_1.1.png
+.. figure:: https://www.oxdef.info/content/images/2014/12/csp-tester_1-1.png
   
   CSP Tester version 1.1 screenshot
   
