@@ -3,11 +3,11 @@ CSP Tester
 ===========
 
 This extension helps web masters to test web application behaviour 
-with Content Security Policy (CSP_) ver. 1.0 implemented.
+with Content Security Policy (CSP_) version 2.0 implemented.
 
-.. figure:: https://www.oxdef.info/content/images/2014/12/csp-tester_1-1.png
+.. figure:: https://oxdef.info/downloads/csp-tester.png
   
-  CSP Tester version 1.1 screenshot
+  CSP Tester screenshot
   
 You can install CSP Tester from `Chrome Web Store`_
 
@@ -19,8 +19,8 @@ To verify functionality of CSP Tester:
 #. Open the Developer Tools, navigate to the tested site such as http://eff.org
 #. Confirm a number of CSP violations reported in the Developer Tools Console as well as possible visual changes
 
-To analyze CSP logs you can use `CSP Reporter <https://www.oxdef.info/csp-reporter>`__
+To analyze CSP logs you can use `CSP Reporter <https://oxdef.info/csp-reporter>`__
 
-.. _CSP: http://www.w3.org/TR/CSP/ 
+.. _CSP: http://www.w3.org/TR/CSP2/
 .. _Download: https://github.com/oxdef/csp-tester/archive/master.zip
 .. _Chrome Web Store: https://chrome.google.com/webstore/detail/csp-tester/ehmipebdmhlmikaopdfoinmcjhhfadlf

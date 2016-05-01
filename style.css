@@ -1,7 +1,7 @@
 body {
     overflow-x: hidden;
     font-family: sans-serif;
-    min-width: 600px;
+    min-width: 800px;
     font-size:1em;
     margin:0;
     padding:0;
@@ -26,16 +26,32 @@ input[type=button] {
 }
 
 input[type=text] {
-    width: 20em;
+    width: 30em;
+    font-size:0.8em;
+    font-family:monospace;
 }
 
-:invalid {
-    background-color: #fab9a2;
-}
-
-textarea {
+textarea.policy {
     width: 30em;
     height: 10em;
+    font-size:0.8em;
+    font-family:monospace;
+}
+
+td.warning_icon {
+    color: red;
+    display: none;
+}
+
+input[type=text]:focus {
+    background-color: #eee8aa;
+}
+
+textarea.policy {
+    width: 30em;
+    height: 10em;
+    font-size:0.8em;
+    font-family:monospace;
 }
 
 #header {
@@ -65,6 +81,7 @@ textarea {
     font-size:1.8em;
 }
 
-table tr td.directive {
-    min-width: 6em;
+
+table.url_pattern {
+    margin-bottom: 0.3em;
 }

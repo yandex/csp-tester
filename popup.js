@@ -1,26 +1,34 @@
 var directives = [
     'default-src',
     'script-src',
-    'object-src',
-    'style-src',
+    'style-src', 
     'img-src',
-    'media-src',
-    'frame-src',
-    'font-src',
     'connect-src',
+    'child-src',
+    'font-src',
+    'form-action',
+    'frame-ancestors',
+    'frame-src',
+    'media-src',
+    'object-src',
+    'plugin-types', 
+    'base-uri',
     'sandbox',
-    'report-uri'
+    'report-uri',
     ];
 
 var keywords = ['self', 'unsafe-inline', 'unsafe-eval'];
+
+var SIMPLE_MODE = 1;
+var ADVANCED_MODE = 2;
 
 // http://www.w3.org/TR/CSP/#parsing
 function parse_policy(policy) {
     var result = {};
     var chunks = policy.split(';');
     var tmp;
-    for (var i=0;i<chunks.length; i++) {
-        for (var j=0;j<directives.length;j++) {
+    for (var i=0; i<chunks.length; i++) {
+        for (var j=0; j<directives.length; j++) {
             tmp = chunks[i].split(directives[j] + ' ');
             if (tmp.length > 1) {
                 result[directives[j]] = tmp[1].trim();
@@ -146,7 +154,7 @@ function toggle_view() {
     var simple_link = document.getElementById("simple_link");
     var simple = document.getElementById("simple");
 
-    if (localStorage.getItem('mode') == 1) {
+    if (localStorage.getItem('mode') == SIMPLE_MODE) {
         advanced_link.style.display = 'inline';
         adv.style.display = 'none';
         simple_link.style.display = 'none';
@@ -160,12 +168,12 @@ function toggle_view() {
 }
 
 function switch2advanced() {
-    localStorage['mode'] = 2;
     var csp_value = '';
     var tmp_value = '';
 
     for (var i=0;i<directives.length;i++) {
         tmp_value = document.getElementById(directives[i]).value.trim(); 
+        console.log(tmp_value);
         for (var j=0;j<keywords.length;j++) {
             if (document.getElementById(directives[i] + '-' + keywords[j]) 
                     && document.getElementById(directives[i] + '-' + keywords[j]).checked) {
@@ -174,21 +182,21 @@ function switch2advanced() {
             }
         }
         if (tmp_value) {
-            csp_value += directives[i] + ' ' + tmp_value + '; ';
+            csp_value += directives[i] + ' ' + tmp_value.trim() + '; ';
         }
     }
     if (csp_value) {
         csp_value = csp_value.slice(0, csp_value.length - 2);
     }
     document.getElementById("policy").value = csp_value;
+    localStorage['mode'] = ADVANCED_MODE;
     toggle_view();
 }
 
 function switch2simple() {
-    localStorage['mode'] = 1;
     var csp_chunks = parse_policy(document.getElementById("policy").value);
     var tmp_value = '';
-    for (var i=0;i<directives.length;i++) {
+    for (var i=0; i<directives.length; i++) {
         if (directives[i] in csp_chunks) {
             tmp_value = csp_chunks[directives[i]];
             for (var j=0;j<keywords.length;j++) {
@@ -203,6 +211,7 @@ function switch2simple() {
             document.getElementById(directives[i]).value = '';
         }
     }
+    localStorage['mode'] = SIMPLE_MODE;
     toggle_view();
 }
 
