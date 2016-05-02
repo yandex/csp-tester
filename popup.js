@@ -1,91 +1,135 @@
-var directives = [
-    'default-src',
-    'script-src',
-    'style-src', 
-    'img-src',
-    'connect-src',
-    'child-src',
-    'font-src',
-    'form-action',
-    'frame-ancestors',
-    'frame-src',
-    'media-src',
-    'object-src',
-    'plugin-types', 
-    'base-uri',
-    'sandbox',
-    'report-uri',
-    ];
-
 var keywords = ['self', 'unsafe-inline', 'unsafe-eval'];
 
-var SIMPLE_MODE = 1;
-var ADVANCED_MODE = 2;
+var MODE_SIMPLE = 1;
+var MODE_ADVANCED = 2;
+var STATE_ACTIVE = 1;
+var STATE_NOTACTIVE = 0;
 
-// http://www.w3.org/TR/CSP/#parsing
-function parse_policy(policy) {
-    var result = {};
-    var chunks = policy.split(';');
-    var tmp;
-    for (var i=0; i<chunks.length; i++) {
-        for (var j=0; j<directives.length; j++) {
-            tmp = chunks[i].split(directives[j] + ' ');
-            if (tmp.length > 1) {
-                result[directives[j]] = tmp[1].trim();
-                break;
+function Directive(name, keywords) {
+    var self = this;
+    this.name = name;
+    this.value = '';
+
+    if (keywords === undefined) {
+        this.keywords = ['self'];
+    }
+
+    this.init_value = function(value) {
+        self.value = value;
+    }
+}
+
+function Policy() {
+    var self = this;
+    this.directives = [];
+
+    this.init_value = function(policy) {
+        self.directives = [];
+        var tokens = policy.split(';');
+
+        for (var i=0; i<tokens.length; i++) {
+            var directive_value = '';
+            var chunks = tokens[i].trim().split(' ');
+            var directive_name = chunks[0];
+
+            if (chunks.length > 1) {
+                directive_value = chunks.slice(1).join(' ');
+            }
+
+            var directive = make_directive(directive_name);
+            if (directive) {
+                directive.init_value(directive_value);
+                self.directives.push(directive);
             }
         }
     }
-    return result;
-}
 
-function save_policy() {
-    var policies = [];
-    var csp_value = '';
-    var csp_chunks = {};
-    var tmp_value = '';
-    localStorage["target"] = document.getElementById("target").value;
+    this.init_from_simple_form = function() {
+        self.directives = [];
+        var elems = document.getElementsByClassName("directive_value");
 
-    if (localStorage.getItem('mode') == 2) {
-        localStorage['policy'] = document.getElementById("policy").value;
-        csp_chunks = parse_policy(localStorage['policy']);
-        for (var i=0;i<directives.length;i++) {
-            if (directives[i] in csp_chunks) {
-                localStorage[directives[i]] = csp_chunks[directives[i]]; 
-            } else {
-                localStorage[directives[i]] = ''; 
-            }
-        }
-    } else {
-        for (var i=0;i<directives.length;i++) {
-            tmp_value = document.getElementById(directives[i]).value;
-            for (var j=0;j<keywords.length;j++) {
+        for (var i=0; i<elems.length; i++) {
+            var directive = make_directive(elems[i].id);
+            var tmp_value = elems[i].value;
+
+            for (var j=0; j<keywords.length; j++) {
                 tmp_value = tmp_value.replace("'" + keywords[j] +"'", ''); 
-                if (document.getElementById(directives[i] + '-' + keywords[j]) 
-                        && document.getElementById(directives[i] + '-'+ keywords[j]).checked) {
+                if (document.getElementById(directive.name + '-' + keywords[j]) 
+                        && document.getElementById(directive.name + '-'+ keywords[j]).checked) {
                     tmp_value += " '" + keywords[j] + "'";
                 }
             }
-            localStorage.setItem(directives[i], tmp_value.trim());
-            if (localStorage[directives[i]]) {
-                csp_value += directives[i] + ' ' + localStorage[directives[i]] + '; ';
+            if (directive && tmp_value) {
+                directive.init_value(tmp_value);
+                self.directives.push(directive);
             }
         }
-        if (csp_value) {
-            csp_value = csp_value.slice(0, csp_value.length - 2);
-        }
-        localStorage['policy'] = csp_value;
     }
 
-    if (document.getElementById("state").checked) {
-        localStorage["state"] = 1;
-    } else {
-        localStorage["state"] = 0;
+    function make_directive(directive_name) {
+        var directive_names = [
+            'default-src', 'script-src', 'style-src', 'img-src',
+            'connect-src', 'child-src', 'font-src', 'form-action',
+            'frame-ancestors', 'frame-src', 'media-src', 'object-src',
+            'plugin-types', 'base-uri', 'sandbox', 'report-uri'
+            ];
+        for (var i=0; i<directive_names.length; i++) {
+            if (directive_names[i] == directive_name) {
+                return new Directive(directive_name);
+            }
+        }
+        return null;
     }
-    if (document.getElementById("report_only").checked) {
-        localStorage["report_only"] = 1;
+
+    this.init_from_advanced_form = function() {
+        self.init_value(get_value("policy"));
+    }
+
+    this.save = function() {
+        localStorage['policy'] = self.get_string_policy();
+    }
+
+    this.restore = function() {
+        if (localStorage.getItem('policy')) {
+            self.init_value(localStorage['policy']);
+        }
+    }
+
+    this.get_string_policy = function() {
+        var result = '';
+        for (var i=0; i<self.directives.length; i++) {
+            result += self.directives[i].name + ' ' + self.directives[i].value.trim() + '; ';
+        }
+        if (result) {
+            result = result.slice(0, result.length - 2);
+        }
+        return result;
+    }
+}
+
+function save_policy() {
+    var csp = new Policy();
+
+    localStorage["target"] = get_value("target");
+
+    if (localStorage.getItem('mode') == MODE_ADVANCED) {
+        csp.init_from_advanced_form();
     } else {
-        localStorage["report_only"] = 0;
+        csp.init_from_simple_form();
+    }
+    
+    csp.save();
+    
+    if (get_checked("state")) {
+        localStorage["state"] = STATE_ACTIVE;
+    } else {
+        localStorage["state"] = STATE_NOTACTIVE;
+    }
+
+    if (get_checked("report_only")) {
+        localStorage["report_only"] = STATE_ACTIVE;
+    } else {
+        localStorage["report_only"] = STATE_NOTACTIVE;
     }
     var status = document.getElementById("status");
     var bg = chrome.extension.getBackgroundPage()
@@ -95,7 +139,7 @@ function save_policy() {
     } else {
         status.innerHTML = "Policy has not been saved! Please, check URL pattern.";
         status.style.display = 'block';
-        localStorage["state"] = 0;
+        localStorage["state"] = STATE_NOTACTIVE;
         document.getElementById("state").checked = false;
     }
     setTimeout(function() {
@@ -104,48 +148,40 @@ function save_policy() {
 }
 
 function load_policy() {
-    var tmp_value = '';
-
     if (localStorage.getItem("target")) {
-        document.getElementById("target").value = localStorage.getItem("target");
+        set_value("target", localStorage.getItem("target"));
     }
     
-    if (localStorage.getItem("policy")) {
-        document.getElementById("policy").value = localStorage.getItem("policy");
-    }
-    for (var i=0;i<directives.length;i++) {
-        if (localStorage.getItem(directives[i])) {
-            tmp_value = localStorage.getItem(directives[i]);
-            for (var j=0;j<keywords.length;j++) {
-                if (tmp_value.indexOf("'"+keywords[j]+"'") > -1 
-                        && document.getElementById(directives[i] + '-' + keywords[j])) {
-                    tmp_value = tmp_value.replace("'" + keywords[j] +"'", ''); 
-                    document.getElementById(directives[i] + '-' + keywords[j]).checked = true;
-                }
-            }
-            document.getElementById(directives[i]).value = tmp_value.trim();
-        }
-    }
+    var csp = new Policy();
+    csp.restore();
 
-    if (localStorage["state"] == 1) {
-        document.getElementById("state").checked = true;
+    var mode = localStorage.getItem('mode') ? localStorage.getItem('mode') : MODE_ADVANCED;
+
+    if (mode == MODE_ADVANCED) {
+        set_value("policy", csp.get_string_policy());
+    } else {
+        restore_simple_form(csp);
+    }
+ 
+    if (localStorage["state"] == STATE_ACTIVE) {
+        set_checked("state", true);
     }
     if (localStorage["report_only"] == 1) {
-        document.getElementById("report_only").checked = true;
+        set_checked("report_only", true);
     }
 }
 
 function reset_policy() {
-    document.getElementById("target").value = '';
+    set_value("target", '');
+    set_value("policy", '');
 
-    for (var i=0;i<directives.length;i++) {
-        if (localStorage.getItem(directives[i])) {
-            document.getElementById(directives[i]).value = '';
-        }
+    var elems = document.getElementsByClassName("directive_value");
+    for (var i=0; i<elems.length; i++) {
+        elems[i].value = '';
     }
 
-    document.getElementById("state").checked = false;
-    document.getElementById("report_only").checked = false;
+    set_checked("state", false);
+    set_checked("report_only", false);
 }
 
 function toggle_view() {
@@ -154,7 +190,7 @@ function toggle_view() {
     var simple_link = document.getElementById("simple_link");
     var simple = document.getElementById("simple");
 
-    if (localStorage.getItem('mode') == SIMPLE_MODE) {
+    if (localStorage.getItem('mode') == MODE_SIMPLE) {
         advanced_link.style.display = 'inline';
         adv.style.display = 'none';
         simple_link.style.display = 'none';
@@ -168,56 +204,57 @@ function toggle_view() {
 }
 
 function switch2advanced() {
-    var csp_value = '';
-    var tmp_value = '';
-
-    for (var i=0;i<directives.length;i++) {
-        tmp_value = document.getElementById(directives[i]).value.trim(); 
-        console.log(tmp_value);
-        for (var j=0;j<keywords.length;j++) {
-            if (document.getElementById(directives[i] + '-' + keywords[j]) 
-                    && document.getElementById(directives[i] + '-' + keywords[j]).checked) {
-                tmp_value = tmp_value.replace("'" + keywords[j] +"'", ''); 
-                tmp_value += " '" + keywords[j] + "'";
-            }
-        }
-        if (tmp_value) {
-            csp_value += directives[i] + ' ' + tmp_value.trim() + '; ';
-        }
-    }
-    if (csp_value) {
-        csp_value = csp_value.slice(0, csp_value.length - 2);
-    }
-    document.getElementById("policy").value = csp_value;
-    localStorage['mode'] = ADVANCED_MODE;
+    var csp = new Policy();
+    csp.init_from_simple_form();
+    set_value("policy", csp.get_string_policy());
+    localStorage['mode'] = MODE_ADVANCED;
     toggle_view();
 }
 
 function switch2simple() {
-    var csp_chunks = parse_policy(document.getElementById("policy").value);
-    var tmp_value = '';
-    for (var i=0; i<directives.length; i++) {
-        if (directives[i] in csp_chunks) {
-            tmp_value = csp_chunks[directives[i]];
-            for (var j=0;j<keywords.length;j++) {
-                if (tmp_value.indexOf("'"+keywords[j]+"'") > -1 
-                        && document.getElementById(directives[i] + '-' + keywords[j])) {
-                    tmp_value = tmp_value.replace("'" + keywords[j] +"'", ''); 
-                    document.getElementById(directives[i] + '-' + keywords[j]).checked = true;
-                }
-            }
-            document.getElementById(directives[i]).value = tmp_value.trim();
-        } else {
-            document.getElementById(directives[i]).value = '';
-        }
-    }
-    localStorage['mode'] = SIMPLE_MODE;
+    var csp = new Policy();
+    csp.init_from_advanced_form();
+    restore_simple_form(csp);
+    localStorage['mode'] = MODE_SIMPLE;
     toggle_view();
+}
+
+function get_value(id) {
+    return document.getElementById(id).value;
+}
+
+function set_value(id, value) {
+    document.getElementById(id).value = value;
+}
+
+function get_checked(id) {
+    return document.getElementById(id).checked;
+}
+
+function set_checked(id, value) {
+    document.getElementById(id).checked = value;
+}
+
+function restore_simple_form(csp) {
+   var tmp_value = '';
+    for (var i=0; i<csp.directives.length; i++) {
+        directive_value = csp.directives[i].value;
+        directive_name = csp.directives[i].name;
+
+        for (var j=0; j<keywords.length; j++) {
+            if (directive_value.indexOf("'"+keywords[j]+"'") > -1 
+                    && document.getElementById(directive_name + '-' + keywords[j])) {
+                directive_value = directive_value.replace("'" + keywords[j] +"'", ''); 
+                set_checked(directive_name + '-' + keywords[j], true);
+            }
+        }
+        set_value(directive_name, directive_value.trim());
+    }
 }
 
 document.addEventListener('DOMContentLoaded', load_policy);
 document.querySelector('#save').addEventListener('click', save_policy);
-document.querySelector('#save').addEventListener('click', save_policy);
+document.querySelector('#reset').addEventListener('click', reset_policy);
 document.querySelector('#advanced_link').addEventListener('click', switch2advanced);
 document.querySelector('#simple_link').addEventListener('click', switch2simple);
 
