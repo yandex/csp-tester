@@ -132,16 +132,17 @@ function save_policy() {
         localStorage["report_only"] = STATE_NOTACTIVE;
     }
     var status = document.getElementById("status");
+    /* FIXME
     var bg = chrome.extension.getBackgroundPage()
-    if (bg.reload()) {
+    if (bg.reload()) {*/
         status.innerHTML = "Policy has been saved.";
         status.style.display = 'block';
-    } else {
+    /*} else {
         status.innerHTML = "Policy has not been saved! Please, check URL pattern.";
         status.style.display = 'block';
         localStorage["state"] = STATE_NOTACTIVE;
         document.getElementById("state").checked = false;
-    }
+    }*/
     setTimeout(function() {
         status.style.display = 'none';
     }, 850);
@@ -248,8 +249,31 @@ function restore_simple_form(csp) {
                 set_checked(directive_name + '-' + keywords[j], true);
             }
         }
+        if (!is_form_dictive_exists(directive_name)) {
+            add_form_directive(directive_name);
+        }
         set_value(directive_name, directive_value.trim());
     }
+}
+
+function is_form_dictive_exists(directive_name) {
+    return document.getElementById(directive_name) != null;
+}
+
+function add_form_directive(directive_name) {
+    var simple_form = document.getElementById("simple_form");
+    tr = document.getElementById("tr-default-src").cloneNode(true);
+    tr.querySelector(".help_link").href = "https://www.w3.org/TR/CSP2/#directive-" + directive_name;
+    tr.querySelector(".help_link").innerText = directive_name;
+    tr.querySelector(".directive_value").name = directive_name;
+    tr.querySelector(".directive_value").id = directive_name;
+    tr.querySelector(".directive_value").value = '';
+    tr.querySelector("input.self").name = directive_name + '-self';
+    tr.querySelector("input.self").id = directive_name + '-self';
+    tr.querySelector("input.self").checked = false;
+    tr.querySelector("label").setAttribute("for", directive_name + '-self');
+    tr.querySelector("label").innerText = 'self';
+    simple_form.appendChild(tr);
 }
 
 document.addEventListener('DOMContentLoaded', load_policy);
