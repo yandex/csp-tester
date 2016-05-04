@@ -1,58 +1,180 @@
-var keywords = ['self', 'unsafe-inline', 'unsafe-eval'];
+'use strict';
+
+var keywords = ['this', 'unsafe-inline', 'unsafe-eval'];
 
 var MODE_SIMPLE = 1;
 var MODE_ADVANCED = 2;
 var STATE_ACTIVE = 1;
 var STATE_NOTACTIVE = 0;
 
-function Directive(name, keywords) {
-    var self = this;
-    this.name = name;
-    this.value = '';
-
-    if (keywords === undefined) {
-        this.keywords = ['self'];
+class SimpleForm {
+    reset() {
+        let elems = document.getElementsByClassName("directive_value");
+        for (let i=0; i<elems.length; i++) {
+            elems[i].value = '';
+            if (elems[i].name != 'default-src') {
+                this.remove_directive(elems[i].name);
+            }
+        }
     }
 
-    this.init_value = function(value) {
-        self.value = value;
+    remove_directive(directive_name) {
+        let simple_form = document.getElementById("simple_form");
+        simple_form.removeChild(document.getElementById('tr-' + directive_name));
+    }
+
+    restore(csp) {
+        this.reset();
+        let tmp_value = '';
+
+        for (let i=0; i<csp.directives.length; i++) {
+            let directive_value = csp.directives[i].value;
+            let directive_name = csp.directives[i].name;
+
+            for (let j=0; j<keywords.length; j++) {
+                if (directive_value.indexOf("'"+keywords[j]+"'") > -1 
+                        && document.getElementById(directive_name + '-' + keywords[j])) {
+                    directive_value = directive_value.replace("'" + keywords[j] +"'", ''); 
+                    set_checked(directive_name + '-' + keywords[j], true);
+                }
+            }
+            if (!this.is_dictive_exists(directive_name)) {
+                if (directive_name == "script-src" || directive_name == "style-src") {
+                    this.add_directive(directive_name, true, true);
+                } else {
+                    this.add_directive(directive_name);
+                }
+            }
+            set_value(directive_name, directive_value.trim());
+        }
+    }
+
+    is_dictive_exists(directive_name) {
+        return document.getElementById(directive_name) != null;
+    }
+
+    add_directive(directive_name, unsafe_eval, unsafe_inline) {
+        if (unsafe_eval === undefined) {
+            var unsafe_eval = false;
+        }
+
+        if (unsafe_eval === undefined) {
+            var unsafe_eval = false;
+        }
+        let simple_form = document.getElementById("simple_form");
+        let tr = document.getElementById("tr-default-src").cloneNode(true);
+        tr.id = 'tr-' + directive_name;
+        tr.querySelector(".help_link").href = "https://www.w3.org/TR/CSP2/#directive-" + directive_name;
+        tr.querySelector(".help_link").innerText = directive_name;
+        tr.querySelector(".directive_value").name = directive_name;
+        tr.querySelector(".directive_value").id = directive_name;
+        tr.querySelector(".directive_value").value = '';
+        let div_self = tr.querySelector("div.self");
+        div_self.querySelector("input").name = directive_name + '-self';
+        div_self.querySelector("input").id = directive_name + '-self';
+        div_self.querySelector("input").checked = false;
+        div_self.querySelector("label").setAttribute("for", directive_name + '-self');
+
+        if (unsafe_eval) {
+            let d = tr.querySelector("div.unsafe-eval");
+            d.style.display = 'inline';
+            d.querySelector("input").name = directive_name + '-unsafe-eval';
+            d.querySelector("input").id = directive_name + '-unsafe-eval';
+            d.querySelector("input").checked = false;
+            d.querySelector("label").setAttribute("for", directive_name + '-unsafe-eval');
+        }
+
+        if (unsafe_inline) {
+            let d = tr.querySelector("div.unsafe-inline");
+            d.style.display = 'inline';
+            d.querySelector("input").name = directive_name + '-unsafe-inline';
+            d.querySelector("input").id = directive_name + '-unsafe-inline';
+            d.querySelector("input").checked = false;
+            d.querySelector("label").setAttribute("for", directive_name + '-unsafe-inline');
+        }
+
+        simple_form.appendChild(tr);
     }
 }
 
-function Policy() {
-    var self = this;
-    this.directives = [];
+let simple_form = new SimpleForm();
 
-    this.init_value = function(policy) {
-        self.directives = [];
-        var tokens = policy.split(';');
+class Directive {
+    constructor(name, keywords) {
+        this.name = name;
+        this.value = '';
 
-        for (var i=0; i<tokens.length; i++) {
-            var directive_value = '';
-            var chunks = tokens[i].trim().split(' ');
-            var directive_name = chunks[0];
+        if (keywords === undefined) {
+            this.keywords = ['this'];
+        }
+    }
+
+    init_value(value) {
+        this.value = value;
+    }
+}
+
+class Policy {
+    constructor() {
+        this.directives = [];
+    }
+
+    init_value(policy) {
+        this.directives = [];
+        let tokens = policy.split(';');
+
+        for (let i=0; i<tokens.length; i++) {
+            let directive_value = '';
+            let chunks = tokens[i].trim().split(' ');
+            let directive_name = chunks[0];
 
             if (chunks.length > 1) {
                 directive_value = chunks.slice(1).join(' ');
             }
 
-            var directive = make_directive(directive_name);
+            let directive = this.make_directive(directive_name);
             if (directive) {
                 directive.init_value(directive_value);
-                self.directives.push(directive);
+                this.directives.push(directive);
             }
         }
     }
+   
+    make_directive(directive_name) {
+        let directive_names = [
+            'default-src', 'script-src', 'style-src', 'img-src',
+            'connect-src', 'child-src', 'font-src', 'form-action',
+            'frame-ancestors', 'frame-src', 'media-src', 'object-src',
+            'plugin-types', 'base-uri', 'sandbox', 'report-uri'
+            ];
+        for (let i=0; i<directive_names.length; i++) {
+            if (directive_names[i] == directive_name) {
+                return new Directive(directive_name);
+            }
+        }
+        return null;
+    }
 
-    this.init_from_simple_form = function() {
-        self.directives = [];
-        var elems = document.getElementsByClassName("directive_value");
+    get_string_policy() {
+        let result = '';
+        for (let i=0; i<this.directives.length; i++) {
+            result += this.directives[i].name + ' ' + this.directives[i].value.trim() + '; ';
+        }
+        if (result) {
+            result = result.slice(0, result.length - 2);
+        }
+        return result;
+    }
 
-        for (var i=0; i<elems.length; i++) {
-            var directive = make_directive(elems[i].id);
-            var tmp_value = elems[i].value;
+    init_from_simple_form() {
+        this.directives = [];
+        let elems = document.getElementsByClassName("directive_value");
 
-            for (var j=0; j<keywords.length; j++) {
+        for (let i=0; i<elems.length; i++) {
+            let directive = this.make_directive(elems[i].id);
+            let tmp_value = elems[i].value;
+
+            for (let j=0; j<keywords.length; j++) {
                 tmp_value = tmp_value.replace("'" + keywords[j] +"'", ''); 
                 if (document.getElementById(directive.name + '-' + keywords[j]) 
                         && document.getElementById(directive.name + '-'+ keywords[j]).checked) {
@@ -61,50 +183,16 @@ function Policy() {
             }
             if (directive && tmp_value) {
                 directive.init_value(tmp_value);
-                self.directives.push(directive);
+                this.directives.push(directive);
             }
         }
     }
-
-    function make_directive(directive_name) {
-        var directive_names = [
-            'default-src', 'script-src', 'style-src', 'img-src',
-            'connect-src', 'child-src', 'font-src', 'form-action',
-            'frame-ancestors', 'frame-src', 'media-src', 'object-src',
-            'plugin-types', 'base-uri', 'sandbox', 'report-uri'
-            ];
-        for (var i=0; i<directive_names.length; i++) {
-            if (directive_names[i] == directive_name) {
-                return new Directive(directive_name);
-            }
-        }
-        return null;
+ 
+    init_from_advanced_form() {
+        this.init_value(get_value("policy"));
     }
 
-    this.init_from_advanced_form = function() {
-        self.init_value(get_value("policy"));
-    }
 
-    this.save = function() {
-        localStorage['policy'] = self.get_string_policy();
-    }
-
-    this.restore = function() {
-        if (localStorage.getItem('policy')) {
-            self.init_value(localStorage['policy']);
-        }
-    }
-
-    this.get_string_policy = function() {
-        var result = '';
-        for (var i=0; i<self.directives.length; i++) {
-            result += self.directives[i].name + ' ' + self.directives[i].value.trim() + '; ';
-        }
-        if (result) {
-            result = result.slice(0, result.length - 2);
-        }
-        return result;
-    }
 }
 
 function save_policy() {
@@ -118,7 +206,7 @@ function save_policy() {
         csp.init_from_simple_form();
     }
     
-    csp.save();
+    localStorage['policy'] = csp.get_string_policy();
     
     if (get_checked("state")) {
         localStorage["state"] = STATE_ACTIVE;
@@ -154,14 +242,17 @@ function load_policy() {
     }
     
     var csp = new Policy();
-    csp.restore();
+    if (localStorage.getItem('policy')) {
+        csp.init_value(localStorage['policy']);
+    }
+
 
     var mode = localStorage.getItem('mode') ? localStorage.getItem('mode') : MODE_ADVANCED;
 
     if (mode == MODE_ADVANCED) {
         set_value("policy", csp.get_string_policy());
     } else {
-        restore_simple_form(csp);
+        simple_form.restore(csp);
     }
  
     if (localStorage["state"] == STATE_ACTIVE) {
@@ -181,6 +272,7 @@ function reset_policy() {
         elems[i].value = '';
     }
 
+    simple_form.reset();
     set_checked("state", false);
     set_checked("report_only", false);
 }
@@ -215,7 +307,7 @@ function switch2advanced() {
 function switch2simple() {
     var csp = new Policy();
     csp.init_from_advanced_form();
-    restore_simple_form(csp);
+    simple_form.restore(csp);
     localStorage['mode'] = MODE_SIMPLE;
     toggle_view();
 }
@@ -236,45 +328,6 @@ function set_checked(id, value) {
     document.getElementById(id).checked = value;
 }
 
-function restore_simple_form(csp) {
-   var tmp_value = '';
-    for (var i=0; i<csp.directives.length; i++) {
-        directive_value = csp.directives[i].value;
-        directive_name = csp.directives[i].name;
-
-        for (var j=0; j<keywords.length; j++) {
-            if (directive_value.indexOf("'"+keywords[j]+"'") > -1 
-                    && document.getElementById(directive_name + '-' + keywords[j])) {
-                directive_value = directive_value.replace("'" + keywords[j] +"'", ''); 
-                set_checked(directive_name + '-' + keywords[j], true);
-            }
-        }
-        if (!is_form_dictive_exists(directive_name)) {
-            add_form_directive(directive_name);
-        }
-        set_value(directive_name, directive_value.trim());
-    }
-}
-
-function is_form_dictive_exists(directive_name) {
-    return document.getElementById(directive_name) != null;
-}
-
-function add_form_directive(directive_name) {
-    var simple_form = document.getElementById("simple_form");
-    tr = document.getElementById("tr-default-src").cloneNode(true);
-    tr.querySelector(".help_link").href = "https://www.w3.org/TR/CSP2/#directive-" + directive_name;
-    tr.querySelector(".help_link").innerText = directive_name;
-    tr.querySelector(".directive_value").name = directive_name;
-    tr.querySelector(".directive_value").id = directive_name;
-    tr.querySelector(".directive_value").value = '';
-    tr.querySelector("input.self").name = directive_name + '-self';
-    tr.querySelector("input.self").id = directive_name + '-self';
-    tr.querySelector("input.self").checked = false;
-    tr.querySelector("label").setAttribute("for", directive_name + '-self');
-    tr.querySelector("label").innerText = 'self';
-    simple_form.appendChild(tr);
-}
 
 document.addEventListener('DOMContentLoaded', load_policy);
 document.querySelector('#save').addEventListener('click', save_policy);

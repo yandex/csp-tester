@@ -85,3 +85,10 @@ textarea.policy {
 table.url_pattern {
     margin-bottom: 0.3em;
 }
+
+div.self {
+    display: inline;
+}
+div.unsafe-eval, div.unsafe-inline {
+    display: none;
+}
