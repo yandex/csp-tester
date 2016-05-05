@@ -1,6 +1,6 @@
 'use strict';
 
-var keywords = ['this', 'unsafe-inline', 'unsafe-eval'];
+var keywords = ['self', 'unsafe-inline', 'unsafe-eval'];
 
 var MODE_SIMPLE = 1;
 var MODE_ADVANCED = 2;
@@ -8,23 +8,29 @@ var STATE_ACTIVE = 1;
 var STATE_NOTACTIVE = 0;
 
 class SimpleForm {
-    reset() {
+    static reset() {
         let elems = document.getElementsByClassName("directive_value");
         for (let i=0; i<elems.length; i++) {
             elems[i].value = '';
             if (elems[i].name != 'default-src') {
-                this.remove_directive(elems[i].name);
+                SimpleForm.remove_directive(elems[i].name);
             }
         }
+
+        let pinned_directives = ['script-src', 'style-src', 'img-src'];
+        for (let i=0; i<pinned_directives.length; i++) {
+            SimpleForm.add_directive(pinned_directives[i]);
+        }
+
     }
 
-    remove_directive(directive_name) {
+    static remove_directive(directive_name) {
         let simple_form = document.getElementById("simple_form");
         simple_form.removeChild(document.getElementById('tr-' + directive_name));
     }
 
-    restore(csp) {
-        this.reset();
+    static restore(csp) {
+        SimpleForm.reset();
         let tmp_value = '';
 
         for (let i=0; i<csp.directives.length; i++) {
@@ -38,29 +44,34 @@ class SimpleForm {
                     set_checked(directive_name + '-' + keywords[j], true);
                 }
             }
-            if (!this.is_dictive_exists(directive_name)) {
-                if (directive_name == "script-src" || directive_name == "style-src") {
-                    this.add_directive(directive_name, true, true);
-                } else {
-                    this.add_directive(directive_name);
-                }
+            if (!SimpleForm.is_dictive_exists(directive_name)) {
+                SimpleForm.add_directive(directive_name);
             }
             set_value(directive_name, directive_value.trim());
         }
     }
 
-    is_dictive_exists(directive_name) {
+    static is_dictive_exists(directive_name) {
         return document.getElementById(directive_name) != null;
     }
 
-    add_directive(directive_name, unsafe_eval, unsafe_inline) {
+    static add_directive(directive_name, unsafe_eval, unsafe_inline) {
         if (unsafe_eval === undefined) {
-            var unsafe_eval = false;
+            if (['script-src', 'style-src'].indexOf(directive_name) !== -1) {
+                var unsafe_eval = true;
+            } else {
+                var unsafe_eval = false;
+            }
         }
 
-        if (unsafe_eval === undefined) {
-            var unsafe_eval = false;
+        if (unsafe_inline === undefined) {
+            if (['script-src', 'style-src'].indexOf(directive_name) !== -1) {
+                var unsafe_inline = true;
+            } else {
+                var unsafe_inline = false;
+            }
         }
+
         let simple_form = document.getElementById("simple_form");
         let tr = document.getElementById("tr-default-src").cloneNode(true);
         tr.id = 'tr-' + directive_name;
@@ -74,6 +85,9 @@ class SimpleForm {
         div_self.querySelector("input").id = directive_name + '-self';
         div_self.querySelector("input").checked = false;
         div_self.querySelector("label").setAttribute("for", directive_name + '-self');
+        let d = tr.querySelector("div.delete-icon");
+        d.style.display = 'inline';
+        d.onclick = function() {SimpleForm.remove_directive(directive_name);return false;}
 
         if (unsafe_eval) {
             let d = tr.querySelector("div.unsafe-eval");
@@ -96,8 +110,6 @@ class SimpleForm {
         simple_form.appendChild(tr);
     }
 }
-
-let simple_form = new SimpleForm();
 
 class Directive {
     constructor(name, keywords) {
@@ -173,7 +185,6 @@ class Policy {
         for (let i=0; i<elems.length; i++) {
             let directive = this.make_directive(elems[i].id);
             let tmp_value = elems[i].value;
-
             for (let j=0; j<keywords.length; j++) {
                 tmp_value = tmp_value.replace("'" + keywords[j] +"'", ''); 
                 if (document.getElementById(directive.name + '-' + keywords[j]) 
@@ -252,7 +263,7 @@ function load_policy() {
     if (mode == MODE_ADVANCED) {
         set_value("policy", csp.get_string_policy());
     } else {
-        simple_form.restore(csp);
+        SimpleForm.restore(csp);
     }
  
     if (localStorage["state"] == STATE_ACTIVE) {
@@ -272,7 +283,7 @@ function reset_policy() {
         elems[i].value = '';
     }
 
-    simple_form.reset();
+    SimpleForm.reset();
     set_checked("state", false);
     set_checked("report_only", false);
 }
@@ -307,7 +318,7 @@ function switch2advanced() {
 function switch2simple() {
     var csp = new Policy();
     csp.init_from_advanced_form();
-    simple_form.restore(csp);
+    SimpleForm.restore(csp);
     localStorage['mode'] = MODE_SIMPLE;
     toggle_view();
 }

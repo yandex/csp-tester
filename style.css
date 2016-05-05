@@ -38,10 +38,6 @@ textarea.policy {
     font-family:monospace;
 }
 
-td.warning_icon {
-    color: red;
-    display: none;
-}
 
 input[type=text]:focus {
     background-color: #eee8aa;
@@ -82,13 +78,26 @@ textarea.policy {
 }
 
 
-table.url_pattern {
+table.url-pattern {
     margin-bottom: 0.3em;
 }
 
 div.self {
     display: inline;
 }
+
 div.unsafe-eval, div.unsafe-inline {
     display: none;
 }
+
+div.delete-icon {
+    display: none;
+}
+div.delete-icon a {
+    text-decoration:none;
+}
+div.warning-icon {
+    color: red;
+    display: none;
+}
+
