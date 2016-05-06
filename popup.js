@@ -7,110 +7,6 @@ var MODE_ADVANCED = 2;
 var STATE_ACTIVE = 1;
 var STATE_NOTACTIVE = 0;
 
-class SimpleForm {
-    static reset() {
-        let elems = document.getElementsByClassName("directive_value");
-        for (let i=0; i<elems.length; i++) {
-            elems[i].value = '';
-            if (elems[i].name != 'default-src') {
-                SimpleForm.remove_directive(elems[i].name);
-            }
-        }
-
-        let pinned_directives = ['script-src', 'style-src', 'img-src'];
-        for (let i=0; i<pinned_directives.length; i++) {
-            SimpleForm.add_directive(pinned_directives[i]);
-        }
-
-    }
-
-    static remove_directive(directive_name) {
-        let simple_form = document.getElementById("simple_form");
-        simple_form.removeChild(document.getElementById('tr-' + directive_name));
-    }
-
-    static restore(csp) {
-        SimpleForm.reset();
-        let tmp_value = '';
-
-        for (let i=0; i<csp.directives.length; i++) {
-            let directive_value = csp.directives[i].value;
-            let directive_name = csp.directives[i].name;
-
-            for (let j=0; j<keywords.length; j++) {
-                if (directive_value.indexOf("'"+keywords[j]+"'") > -1 
-                        && document.getElementById(directive_name + '-' + keywords[j])) {
-                    directive_value = directive_value.replace("'" + keywords[j] +"'", ''); 
-                    set_checked(directive_name + '-' + keywords[j], true);
-                }
-            }
-            if (!SimpleForm.is_dictive_exists(directive_name)) {
-                SimpleForm.add_directive(directive_name);
-            }
-            set_value(directive_name, directive_value.trim());
-        }
-    }
-
-    static is_dictive_exists(directive_name) {
-        return document.getElementById(directive_name) != null;
-    }
-
-    static add_directive(directive_name, unsafe_eval, unsafe_inline) {
-        if (unsafe_eval === undefined) {
-            if (['script-src', 'style-src'].indexOf(directive_name) !== -1) {
-                var unsafe_eval = true;
-            } else {
-                var unsafe_eval = false;
-            }
-        }
-
-        if (unsafe_inline === undefined) {
-            if (['script-src', 'style-src'].indexOf(directive_name) !== -1) {
-                var unsafe_inline = true;
-            } else {
-                var unsafe_inline = false;
-            }
-        }
-
-        let simple_form = document.getElementById("simple_form");
-        let tr = document.getElementById("tr-default-src").cloneNode(true);
-        tr.id = 'tr-' + directive_name;
-        tr.querySelector(".help_link").href = "https://www.w3.org/TR/CSP2/#directive-" + directive_name;
-        tr.querySelector(".help_link").innerText = directive_name;
-        tr.querySelector(".directive_value").name = directive_name;
-        tr.querySelector(".directive_value").id = directive_name;
-        tr.querySelector(".directive_value").value = '';
-        let div_self = tr.querySelector("div.self");
-        div_self.querySelector("input").name = directive_name + '-self';
-        div_self.querySelector("input").id = directive_name + '-self';
-        div_self.querySelector("input").checked = false;
-        div_self.querySelector("label").setAttribute("for", directive_name + '-self');
-        let d = tr.querySelector("div.delete-icon");
-        d.style.display = 'inline';
-        d.onclick = function() {SimpleForm.remove_directive(directive_name);return false;}
-
-        if (unsafe_eval) {
-            let d = tr.querySelector("div.unsafe-eval");
-            d.style.display = 'inline';
-            d.querySelector("input").name = directive_name + '-unsafe-eval';
-            d.querySelector("input").id = directive_name + '-unsafe-eval';
-            d.querySelector("input").checked = false;
-            d.querySelector("label").setAttribute("for", directive_name + '-unsafe-eval');
-        }
-
-        if (unsafe_inline) {
-            let d = tr.querySelector("div.unsafe-inline");
-            d.style.display = 'inline';
-            d.querySelector("input").name = directive_name + '-unsafe-inline';
-            d.querySelector("input").id = directive_name + '-unsafe-inline';
-            d.querySelector("input").checked = false;
-            d.querySelector("label").setAttribute("for", directive_name + '-unsafe-inline');
-        }
-
-        simple_form.appendChild(tr);
-    }
-}
-
 class Directive {
     constructor(name, keywords) {
         this.name = name;
@@ -125,6 +21,7 @@ class Directive {
         this.value = value;
     }
 }
+
 
 class Policy {
     constructor() {
@@ -152,13 +49,19 @@ class Policy {
         }
     }
    
-    make_directive(directive_name) {
-        let directive_names = [
+    static get_directive_names() {
+         let directive_names = [
             'default-src', 'script-src', 'style-src', 'img-src',
             'connect-src', 'child-src', 'font-src', 'form-action',
             'frame-ancestors', 'frame-src', 'media-src', 'object-src',
             'plugin-types', 'base-uri', 'sandbox', 'report-uri'
             ];
+
+        return directive_names;
+    }
+
+    make_directive(directive_name) {
+        let directive_names = Policy.get_directive_names();
         for (let i=0; i<directive_names.length; i++) {
             if (directive_names[i] == directive_name) {
                 return new Directive(directive_name);
@@ -202,10 +105,134 @@ class Policy {
     init_from_advanced_form() {
         this.init_value(get_value("policy"));
     }
-
-
 }
 
+
+class SimpleForm {
+    static reset() {
+        let directive_names = [];
+        let elems = document.getElementsByClassName("directive_value");
+
+        set_value('default-src', '');
+        set_checked('default-src-self', false);
+
+        for (let i=0; i<elems.length; i++) {
+            if (elems[i].id != 'default-src') { 
+                directive_names.push(elems[i].id);
+            }
+        }
+
+        for (let i=0; i<directive_names.length; i++) {
+            SimpleForm.remove_directive(directive_names[i]);
+        }
+
+        let pinned_directives = ['script-src', 'style-src', 'img-src'];
+        for (let i=0; i<pinned_directives.length; i++) {
+            SimpleForm.add_directive(pinned_directives[i], false);
+        }
+
+    }
+
+    static remove_directive(directive_name) {
+        let simple_form = document.getElementById("simple_form");
+        simple_form.removeChild(document.getElementById('tr-' + directive_name));
+    }
+
+    static populate_select() {
+        let select = document.getElementById("select-directive");
+        let directive_names = Policy.get_directive_names().sort();
+        for (let i=0; i<directive_names.length; i++) {
+            let new_option = new Option(directive_names[i], directive_names[i]);
+            select.appendChild(new_option);
+        }
+    }
+
+    static restore(csp) {
+        SimpleForm.reset();
+        SimpleForm.populate_select();
+        let tmp_value = '';
+
+        for (let i=0; i<csp.directives.length; i++) {
+            let directive_value = csp.directives[i].value;
+            let directive_name = csp.directives[i].name;
+
+            if (!SimpleForm.is_directive_exists(directive_name)) {
+                SimpleForm.add_directive(directive_name);
+            }
+
+            for (let j=0; j<keywords.length; j++) {
+                if (directive_value.indexOf("'"+keywords[j]+"'") > -1 
+                        && document.getElementById(directive_name + '-' + keywords[j])) {
+                    directive_value = directive_value.replace("'" + keywords[j] +"'", ''); 
+                    set_checked(directive_name + '-' + keywords[j], true);
+                }
+            }
+            set_value(directive_name, directive_value.trim());
+        }
+    }
+
+    static is_directive_exists(directive_name) {
+        return document.getElementById(directive_name) != null;
+    }
+
+    static add_directive(directive_name, delete_link) {
+        if (['script-src', 'style-src'].indexOf(directive_name) !== -1) {
+            var unsafe_eval = true;
+        } else {
+            var unsafe_eval = false;
+        }
+
+        if (['script-src', 'style-src'].indexOf(directive_name) !== -1) {
+            var unsafe_inline = true;
+        } else {
+            var unsafe_inline = false;
+        }
+
+        if (delete_link === undefined) {
+            var delete_link = true;
+        }
+
+        let simple_form = document.getElementById("simple_form");
+        let tr = document.getElementById("tr-default-src").cloneNode(true);
+        tr.id = 'tr-' + directive_name;
+        tr.querySelector(".help_link").href = "https://www.w3.org/TR/CSP2/#directive-" + directive_name;
+        tr.querySelector(".help_link").innerText = directive_name;
+        tr.querySelector(".directive_value").name = directive_name;
+        tr.querySelector(".directive_value").id = directive_name;
+        tr.querySelector(".directive_value").value = '';
+        let div_self = tr.querySelector("div.self");
+        div_self.querySelector("input").name = directive_name + '-self';
+        div_self.querySelector("input").id = directive_name + '-self';
+        div_self.querySelector("input").checked = false;
+        div_self.querySelector("label").setAttribute("for", directive_name + '-self');
+
+        if (delete_link) {
+            let d = tr.querySelector("div.delete-icon");
+            d.style.display = 'inline';
+            d.onclick = function() {SimpleForm.remove_directive(directive_name);return false;}
+        }
+
+        if (unsafe_eval) {
+            let d = tr.querySelector("div.unsafe-eval");
+            d.style.display = 'inline';
+            d.querySelector("input").name = directive_name + '-unsafe-eval';
+            d.querySelector("input").id = directive_name + '-unsafe-eval';
+            d.querySelector("input").checked = false;
+            d.querySelector("label").setAttribute("for", directive_name + '-unsafe-eval');
+        }
+
+        if (unsafe_inline) {
+            let d = tr.querySelector("div.unsafe-inline");
+            d.style.display = 'inline';
+            d.querySelector("input").name = directive_name + '-unsafe-inline';
+            d.querySelector("input").id = directive_name + '-unsafe-inline';
+            d.querySelector("input").checked = false;
+            d.querySelector("label").setAttribute("for", directive_name + '-unsafe-inline');
+        }
+
+        simple_form.appendChild(tr);
+    }
+}
 function save_policy() {
     var csp = new Policy();
 
@@ -257,7 +284,6 @@ function load_policy() {
         csp.init_value(localStorage['policy']);
     }
 
-
     var mode = localStorage.getItem('mode') ? localStorage.getItem('mode') : MODE_ADVANCED;
 
     if (mode == MODE_ADVANCED) {
@@ -277,15 +303,9 @@ function load_policy() {
 function reset_policy() {
     set_value("target", '');
     set_value("policy", '');
-
-    var elems = document.getElementsByClassName("directive_value");
-    for (var i=0; i<elems.length; i++) {
-        elems[i].value = '';
-    }
-
-    SimpleForm.reset();
     set_checked("state", false);
     set_checked("report_only", false);
+    SimpleForm.reset();
 }
 
 function toggle_view() {
@@ -339,11 +359,20 @@ function set_checked(id, value) {
     document.getElementById(id).checked = value;
 }
 
+function add_directive() {
+    let select = document.getElementById("select-directive");
+    let directive_name = select.options[select.selectedIndex].value;
+    if (!SimpleForm.is_directive_exists(directive_name)) {
+        SimpleForm.add_directive(directive_name);
+    }
+    return false;
+}
 
 document.addEventListener('DOMContentLoaded', load_policy);
 document.querySelector('#save').addEventListener('click', save_policy);
 document.querySelector('#reset').addEventListener('click', reset_policy);
 document.querySelector('#advanced_link').addEventListener('click', switch2advanced);
 document.querySelector('#simple_link').addEventListener('click', switch2simple);
+document.querySelector('#add-directive').addEventListener('click', add_directive);
 
 toggle_view();

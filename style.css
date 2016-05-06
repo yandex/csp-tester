@@ -93,11 +93,23 @@ div.unsafe-eval, div.unsafe-inline {
 div.delete-icon {
     display: none;
 }
-div.delete-icon a {
+
+a.action {
     text-decoration:none;
 }
+
 div.warning-icon {
     color: red;
     display: none;
 }
+
+td.directive {
+    min-width: 6em;
+}
+
+#add-form {
+    margin-bottom: 0.3em;
+    margin-top: 0.3em;
+}
+
 
