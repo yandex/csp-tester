@@ -12,6 +12,9 @@ a {
     color: #1a4780;
     font-size:0.9em;
 }
+select {
+    font-size:0.8em;
+}
 
 img {
     margin: 5px;
@@ -26,12 +29,12 @@ input[type=button] {
 }
 
 input[type=text] {
-    width: 30em;
+    width: 29em;
     font-size:0.8em;
     font-family:monospace;
 }
 
-textarea.policy {
+textarea#policy {
     width: 30em;
     height: 10em;
     font-size:0.8em;
@@ -82,7 +85,7 @@ table.url-pattern {
     margin-bottom: 0.3em;
 }
 
-div.self {
+div.self, div.none {
     display: inline;
 }
 

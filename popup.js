@@ -1,6 +1,6 @@
 'use strict';
 
-var keywords = ['self', 'unsafe-inline', 'unsafe-eval'];
+var keywords = ['none', 'self', 'unsafe-inline', 'unsafe-eval'];
 
 var MODE_SIMPLE = 1;
 var MODE_ADVANCED = 2;
@@ -87,16 +87,27 @@ class Policy {
 
         for (let i=0; i<elems.length; i++) {
             let directive = this.make_directive(elems[i].id);
-            let tmp_value = elems[i].value;
+            let directive_value = elems[i].value.trim();
+            
+            if (directive == null) {
+                continue;
+            }
+
             for (let j=0; j<keywords.length; j++) {
-                tmp_value = tmp_value.replace("'" + keywords[j] +"'", ''); 
-                if (document.getElementById(directive.name + '-' + keywords[j]) 
-                        && document.getElementById(directive.name + '-'+ keywords[j]).checked) {
-                    tmp_value += " '" + keywords[j] + "'";
+                let keyword_value = get_checked(directive.name + '-' + keywords[j]);
+                if (keyword_value) {
+                    if (keywords[j] == 'none') {
+                        directive_value = "'none'";
+                        break;
+                    }
+                    // Clear keyword from directive value
+                    directive_value = directive_value.replace("'" + keywords[j] + "'", ''); 
+                    directive_value += " '" + keywords[j] + "'";
                 }
             }
-            if (directive && tmp_value) {
-                directive.init_value(tmp_value);
+
+            if (directive_value) {
+                directive.init_value(directive_value);
                 this.directives.push(directive);
             }
         }
@@ -161,10 +172,13 @@ class SimpleForm {
             }
 
             for (let j=0; j<keywords.length; j++) {
-                if (directive_value.indexOf("'"+keywords[j]+"'") > -1 
+                if (directive_value.indexOf("'" + keywords[j] + "'") > -1 
                         && document.getElementById(directive_name + '-' + keywords[j])) {
                     directive_value = directive_value.replace("'" + keywords[j] +"'", ''); 
                     set_checked(directive_name + '-' + keywords[j], true);
+                    if (keywords[j] == 'none') {
+                        check_none_box(directive_name); 
+                    }
                 }
             }
             set_value(directive_name, directive_value.trim());
@@ -197,14 +211,21 @@ class SimpleForm {
         tr.id = 'tr-' + directive_name;
         tr.querySelector(".help_link").href = "https://www.w3.org/TR/CSP2/#directive-" + directive_name;
         tr.querySelector(".help_link").innerText = directive_name;
-        tr.querySelector(".directive_value").name = directive_name;
         tr.querySelector(".directive_value").id = directive_name;
         tr.querySelector(".directive_value").value = '';
-        let div_self = tr.querySelector("div.self");
-        div_self.querySelector("input").name = directive_name + '-self';
-        div_self.querySelector("input").id = directive_name + '-self';
-        div_self.querySelector("input").checked = false;
-        div_self.querySelector("label").setAttribute("for", directive_name + '-self');
+        tr.querySelector(".directive_value").disabled = false;
+
+        let d = tr.querySelector("div.self");
+        d.querySelector("input").id = directive_name + '-self';
+        d.querySelector("input").checked = false;
+        d.querySelector("input").disabled = false;
+        d.querySelector("label").setAttribute("for", directive_name + '-self');
+
+        d = tr.querySelector("div.none");
+        d.querySelector("input").id = directive_name + '-none';
+        d.querySelector("input").checked = false;
+        d.querySelector("input").onchange = function() {check_none_box(directive_name);};
+        d.querySelector("label").setAttribute("for", directive_name + '-none');
 
         if (delete_link) {
             let d = tr.querySelector("div.delete-icon");
@@ -215,24 +236,25 @@ class SimpleForm {
         if (unsafe_eval) {
             let d = tr.querySelector("div.unsafe-eval");
             d.style.display = 'inline';
-            d.querySelector("input").name = directive_name + '-unsafe-eval';
             d.querySelector("input").id = directive_name + '-unsafe-eval';
             d.querySelector("input").checked = false;
+            d.querySelector("input").disabled = false;
             d.querySelector("label").setAttribute("for", directive_name + '-unsafe-eval');
         }
 
         if (unsafe_inline) {
             let d = tr.querySelector("div.unsafe-inline");
             d.style.display = 'inline';
-            d.querySelector("input").name = directive_name + '-unsafe-inline';
             d.querySelector("input").id = directive_name + '-unsafe-inline';
             d.querySelector("input").checked = false;
+            d.querySelector("input").disabled = false;
             d.querySelector("label").setAttribute("for", directive_name + '-unsafe-inline');
         }
 
         simple_form.appendChild(tr);
     }
 }
+
 function save_policy() {
     var csp = new Policy();
 
@@ -258,17 +280,17 @@ function save_policy() {
         localStorage["report_only"] = STATE_NOTACTIVE;
     }
     var status = document.getElementById("status");
-    /* FIXME
+    
     var bg = chrome.extension.getBackgroundPage()
-    if (bg.reload()) {*/
+    if (bg.reload()) {
         status.innerHTML = "Policy has been saved.";
         status.style.display = 'block';
-    /*} else {
+    } else {
         status.innerHTML = "Policy has not been saved! Please, check URL pattern.";
         status.style.display = 'block';
         localStorage["state"] = STATE_NOTACTIVE;
         document.getElementById("state").checked = false;
-    }*/
+    }
     setTimeout(function() {
         status.style.display = 'none';
     }, 850);
@@ -352,11 +374,40 @@ function set_value(id, value) {
 }
 
 function get_checked(id) {
-    return document.getElementById(id).checked;
+    if (document.getElementById(id)) {
+        return document.getElementById(id).checked;
+    } else {
+        return null;
+    }
 }
 
 function set_checked(id, value) {
     document.getElementById(id).checked = value;
+}
+
+function set_disabled(id, value) {
+    if (value == undefined) {
+        var value = true;
+    } 
+    
+    if (document.getElementById(id)) {
+        document.getElementById(id).disabled = value;
+    } else {
+        return null;
+    }
+}
+
+function check_none_box(directive_name) {
+    let state = false;
+
+    if (get_checked(directive_name + '-none')) {
+        state = true;
+    }
+
+    set_disabled(directive_name, state);
+    set_disabled(directive_name + '-self', state);
+    set_disabled(directive_name + '-unsafe-inline', state);
+    set_disabled(directive_name + '-unsafe-eval', state);
 }
 
 function add_directive() {
@@ -374,5 +425,6 @@ document.querySelector('#reset').addEventListener('click', reset_policy);
 document.querySelector('#advanced_link').addEventListener('click', switch2advanced);
 document.querySelector('#simple_link').addEventListener('click', switch2simple);
 document.querySelector('#add-directive').addEventListener('click', add_directive);
+document.getElementById('default-src-none').addEventListener('change', function(){check_none_box('default-src')});
 
 toggle_view();

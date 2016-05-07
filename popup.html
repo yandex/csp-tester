@@ -27,19 +27,22 @@
                 </td>
                 <td><input type="text" name="default-src" class="directive_value" id="default-src" value="" /></td>
                 <td><div class="delete-icon"><a href="#" class="action" title="Remove">&#8854;</a></div></td>
-                <td><div class="warning-icon">&#9650;</div></td>
                 <td nowrap="true" class="keywords">
+                    <div class="none">
+                        <input type="checkbox" class="none" id="default-src-none" value="" />
+                        <label for="default-src-none" title="none">&#8709;</label>
+                    </div>
                     <div class="self">
-                        <input type="checkbox" class="self" name="default-src-self" id="default-src-self" value="" />
-                        &nbsp;<label for="default-src-self">self</label>
+                        <input type="checkbox" class="self" id="default-src-self" value="" />
+                        <label for="default-src-self" title="self">&#8712;</label>
                     </div>
                     <div class="unsafe-inline">
-                        <input type="checkbox" name="directive-unsafe-inline" id="directive-unsafe-inline" value="" />
-                        &nbsp;<label for="directive-unsafe-inline" title="unsafe-inline">&#8623;</label>
+                        <input type="checkbox" id="directive-unsafe-inline" value="" />
+                        <label for="directive-unsafe-inline" title="unsafe-inline">&#8623;</label>
                     </div>
                     <div class="unsafe-eval">
-                        <input type="checkbox" name="directive-unsafe-eval" id="directive-unsafe-eval" value="" />
-                        &nbsp;<label for="directive-unsafe-eval" title="unsafe-eval">&#8613;</label>
+                        <input type="checkbox" id="directive-unsafe-eval" value="" />
+                        <label for="directive-unsafe-eval" title="unsafe-eval">&#8613;</label>
                     </div>
                 </td>
             </tr>
@@ -58,7 +61,7 @@
          <table cellpadding="3" cellspacing="3" border="0">
             <tr>
                 <td class="directive"><a href="https://www.w3.org/TR/CSP2/" target="_blank">Policy</a></td>
-                <td><textarea class="policy" name="policy" id="policy"></textarea></td>
+                <td><textarea class="policy" id="policy"></textarea></td>
             </tr>
         </table>
         </div>
