@@ -10,7 +10,7 @@
             <h1>CSP Tester</h1>
         </div>
         <div id="content">
-        <table class="url_pattern" cellpadding="3" cellspacing="3" border="0">
+        <table class="url-pattern" cellpadding="3" cellspacing="3" border="0">
             <tr>
                 <td class="directive"><a href="https://developer.chrome.com/extensions/match_patterns" target="_blank">URL Pattern</a></td>
                 <td>
@@ -20,106 +20,48 @@
         </table>
         <div id="simple">
         <table class="directives" cellpadding="3" cellspacing="3" border="0">
-             <tr>
-                <td class="directive"><a href="https://www.w3.org/TR/CSP2/#directive-base-uri" target="_blank">base-uri</a></td>
-                <td><input type="text" class="directive_value" name="base-uri" id="base-uri" value="" /></td>
-                <td class="warning_icon">&#9650;</td>
-                <td nowrap="true"><input type="checkbox" name="base-uri-self" id="base-uri-self" value="" />&nbsp;<label for="base-uri-self">self</label></td>
-            </tr>
-            <tr>
-                <td class="directive"><a href="https://www.w3.org/TR/CSP2/#directive-child-src" target="_blank">child-src</a></td>
-                <td><input type="text" name="child-src" class="directive_value" id="child-src" value="" /></td>
-                <td class="warning_icon">&#9650;</td>
-                <td nowrap="true"><input type="checkbox" name="child-src-self" id="child-src-self" value="" />&nbsp;<label for="child-src-self">self</label></td>
-            </tr>
-            <tr>
-                <td class="directive"><a href="https://www.w3.org/TR/CSP2/#directive-connect-src" target="_blank">connect-src</a></td>
-                <td><input type="text" name="connect-src" class="directive_value" id="connect-src" value="" /></td>
-                <td class="warning_icon">&#9650;</td>
-                <td nowrap="true"><input type="checkbox" name="connect-src-self" id="connect-src-self" value="" />&nbsp;<label for="connect-src-self">self</label></td>
-            </tr>
-            <tr>
-                <td class="directive"><a href="https://www.w3.org/TR/CSP2/#directive-default-src" target="_blank">default-src</a></td>
+            <tbody id="simple_form">
+            <tr id="tr-default-src">
+                <td class="directive">
+                    <a href="https://www.w3.org/TR/CSP2/#directive-default-src" title="Go to the directive description" class="help_link" target="_blank">default-src</a>
+                </td>
                 <td><input type="text" name="default-src" class="directive_value" id="default-src" value="" /></td>
-                <td class="warning_icon">&#9650;</td>
-                <td nowrap="true"><input type="checkbox" name="default-src-self" id="default-src-self" value="" />&nbsp;<label for="default-src-self">self</label></td>
+                <td><div class="delete-icon"><a href="#" class="action" title="Remove">&#8854;</a></div></td>
+                <td nowrap="true" class="keywords">
+                    <div class="none">
+                        <input type="checkbox" class="none" id="default-src-none" value="" />
+                        <label for="default-src-none" title="none">&#8709;</label>
+                    </div>
+                    <div class="self">
+                        <input type="checkbox" class="self" id="default-src-self" value="" />
+                        <label for="default-src-self" title="self">&#8712;</label>
+                    </div>
+                    <div class="unsafe-inline">
+                        <input type="checkbox" id="directive-unsafe-inline" value="" />
+                        <label for="directive-unsafe-inline" title="unsafe-inline">&#8623;</label>
+                    </div>
+                    <div class="unsafe-eval">
+                        <input type="checkbox" id="directive-unsafe-eval" value="" />
+                        <label for="directive-unsafe-eval" title="unsafe-eval">&#8613;</label>
+                    </div>
+                </td>
             </tr>
-            <tr>
-                <td class="directive"><a href="https://www.w3.org/TR/CSP2/#directive-font-src" target="_blank">font-src</a></td>
-                <td><input type="text" name="font-src" class="directive_value" id="font-src" value="" /></td>
-                <td class="warning_icon">&#9650;</td>
-                <td nowrap="true"><input type="checkbox" name="font-src-self" id="font-src-self" value="" />&nbsp;<label for="font-src-self">self</label></td>
-            </tr>
-             <tr>
-                <td class="directive"><a href="https://www.w3.org/TR/CSP2/#directive-form-action" target="_blank">form-action</a></td>
-                <td><input type="text" name="form-action" class="directive_value" id="form-action" value="" /></td>
-                <td class="warning_icon">&#9650;</td>
-                <td nowrap="true"><input type="checkbox" name="form-action-self" id="form-action-self" value="" />&nbsp;<label for="form-action-self">self</label></td>
-            </tr>
+        </tbody>
+        </table>
+        <table id="add-form" cellpadding="3" cellspacing="3" border="0">
+            <tbody>
                 <tr>
-                <td class="directive"><a href="https://www.w3.org/TR/CSP2/#directive-frame-ancestors" target="_blank">frame-ancestors</a></td>
-                <td><input type="text" name="frame-ancestors" class="directive_value" id="frame-ancestors" value="" /></td>
-                <td class="warning_icon">&#9650;</td>
-                <td nowrap="true"><input type="checkbox" name="frame-ancestors-self" id="frame-ancestors-self" value="" />&nbsp;<label for="frame-ancestors-self">self</label></td>
-            </tr>
-                 <tr>
-                <td class="directive"><a href="https://www.w3.org/TR/CSP2/#directive-frame-src" target="_blank">frame-src</a></td>
-                <td><input type="text" name="frame-src" class="directive_value" id="frame-src" value="" /></td>
-                <td class="warning_icon">&#9650;</td>
-                <td nowrap="true"><input type="checkbox" name="frame-src-self" id="frame-src-self" value="" />&nbsp;<label for="frame-src-self">self</label></td>
-            </tr>
-                   <tr>
-                <td class="directive"><a href="https://www.w3.org/TR/CSP2/#directive-img-src" target="_blank">img-src</a></td>
-                <td><input type="text" name="img-src" class="directive_value" id="img-src" value="" /></td>
-                <td class="warning_icon">&#9650;</td>
-                <td nowrap="true"><input type="checkbox" name="img-src-self" id="img-src-self" value="" />&nbsp;<label for="img-src-self">self</label></td>
-            </tr>
-            <tr>
-                <td class="directive"><a href="https://www.w3.org/TR/CSP2/#directive-media-src" target="_blank">media-src</a></td>
-                <td><input type="text" name="media-src" class="directive_value" id="media-src" value="" /></td>
-                <td class="warning_icon">&#9650;</td>
-                <td nowrap="true"><input type="checkbox" name="media-src-self" id="media-src-self" value="" />&nbsp;<label for="media-src-self">self</label></td>
-            </tr>
-            <tr>
-                <td class="directive"><a href="https://www.w3.org/TR/CSP2/#directive-object-src" target="_blank">object-src</a></td>
-                <td><input type="text" name="object-src" class="directive_value" id="object-src" value="" /></td>
-                <td class="warning_icon">&#9650;</td>
-                <td nowrap="true"><input type="checkbox" name="object-src-self" id="object-src-self" value="" />&nbsp;<label for="object-src-self">self</label></td>
-            </tr>
-        <tr>
-                <td class="directive"><a href="https://www.w3.org/TR/CSP2/#directive-plugin-types" target="_blank">plugin-types</a></td>
-                <td><input type="text" name="plugin-types" class="directive_value" id="plugin-types" value="" /></td>
-                <td class="warning_icon">&#9650;</td>
-            </tr>
-            <tr>
-                <td class="directive"><a href="https://www.w3.org/TR/CSP2/#directive-report-uri" target="_blank">report-uri</a></td>
-                <td><input type="text" name="report-uri" id="report-uri" value="" /></td>
-                <td class="warning_icon">&#9650;</td>
-            </tr>
-            <tr>
-                <td class="directive"><a href="https://www.w3.org/TR/CSP2/#directive-sandbox" target="_blank">sandbox</a></td>
-                <td><input type="text" name="sandbox" class="directive_value" id="sandbox" value="" /></td>
-                <td class="warning_icon">&#9650;</td>
-            </tr>
-            <tr>
-                <td class="directive"><a href="https://www.w3.org/TR/CSP2/#directive-script-src" target="_blank">script-src</a></td>
-                <td><input type="text" name="script-src" class="directive_value" id="script-src" value="" /></td>
-                <td class="warning_icon">&#9650;</td>
-                <td nowrap="true"><input type="checkbox" name="script-src-self" id="script-src-self" value="" />&nbsp;<label for="script-src-self">self</label>&nbsp;<input type="checkbox" name="script-src-unsafe-inline" id="script-src-unsafe-inline" value="" />&nbsp;<label for="script-src-unsafe-inline" title="unsafe-inline">&#8623;</label>&nbsp;<input type="checkbox" name="script-src-unsafe-eval" id="script-src-unsafe-eval" value="" />&nbsp;<label for="script-src-unsafe-eval" title="unsafe-eval">&#8613;</label></td>
-            </tr>
-            <tr>
-                <td class="directive"><a href="https://www.w3.org/TR/CSP2/#directive-style-src" target="_blank">style-src</a></td>
-                <td><input type="text" class="directive_value" name="style-src" id="style-src" value="" /></td>
-                <td class="warning_icon">&#9650;</td>
-                <td nowrap="true"><input type="checkbox" name="style-src-self" id="style-src-self" value="" />&nbsp;<label for="style-src-self">self</label>&nbsp;<input type="checkbox" name="style-src-unsafe-inline" id="style-src-unsafe-inline" value="" />&nbsp;<label for="style-src-unsafe-inline" title="unsafe-inline">&#8623;</label></td>
-            </tr>
+                    <td><select id="select-directive"></select></td>
+                    <td><a href="#" class="action" id="add-directive" title="Add">&#8853;</a></td>
+                </tr>
+            </tbody>
         </table>
         </div>
         <div id="advanced">
          <table cellpadding="3" cellspacing="3" border="0">
             <tr>
                 <td class="directive"><a href="https://www.w3.org/TR/CSP2/" target="_blank">Policy</a></td>
-                <td><textarea class="policy" name="policy" id="policy"></textarea></td>
+                <td><textarea class="policy" id="policy"></textarea></td>
             </tr>
         </table>
         </div>

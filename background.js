@@ -1,8 +1,10 @@
+'use strict';
+
 var callback = function(details) {
     var csp_name = 'Content-Security-Policy';
     var csp_value = localStorage['policy'];
 
-    details.responseHeaders.map(function(val, i, arr){
+    details.responseHeaders.map(function(val, i, arr) {
         if (val.name == csp_name) {
             arr.splice(i, 1);
         }
@@ -11,6 +13,7 @@ var callback = function(details) {
     if (localStorage['report_only'] == 1) {
         csp_name += '-Report-Only';
     }
+
     details.responseHeaders.push({name: csp_name, value: csp_value});
     return {responseHeaders: details.responseHeaders};
 };
