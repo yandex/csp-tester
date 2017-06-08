@@ -15,7 +15,7 @@
     "homepage_url": "https://oxdef.info/csp-tester",
     "applications": {
         "gecko": {
-        "id": "csp-tester@mozilla.org",
+        "id": "csp-tester@oxdef.info",
         "strict_min_version": "45.0"
     }
   }
