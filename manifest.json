@@ -12,5 +12,11 @@
         "scripts": ["background.js"],
         "persistent": true
     },
-    "homepage_url": "https://oxdef.info/csp-tester"
+    "homepage_url": "https://oxdef.info/csp-tester",
+    "applications": {
+        "gecko": {
+        "id": "csp-tester@mozilla.org",
+        "strict_min_version": "45.0"
+    }
+  }
 }
