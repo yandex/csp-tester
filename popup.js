@@ -1,7 +1,6 @@
 'use strict';
 
-var keywords = ['none', 'self', 'unsafe-inline', 'unsafe-eval'];
-
+var KEYWORDS = ['none', 'self', 'unsafe-inline', 'unsafe-eval'];
 var MODE_SIMPLE = 1;
 var MODE_ADVANCED = 2;
 var STATE_ACTIVE = 1;
@@ -20,6 +19,51 @@ class Directive {
     init_value(value) {
         this.value = value;
     }
+
+    static get_directive_names() {
+        let core_directive_names = [
+            'default-src', 'script-src', 'style-src', 'img-src',
+            'connect-src', 'child-src', 'font-src', 'form-action',
+            'frame-ancestors', 'frame-src', 'media-src', 'object-src',
+            'plugin-types', 'base-uri', 'sandbox', 'report-uri'
+            ];
+        // https://www.w3.org/TR/CSP3/#directives-elsewhere
+        let ext_directive_names = [
+            'upgrade-insecure-requests'
+            ];
+        return core_directive_names.concat(ext_directive_names);
+    }
+
+    support_eval() {
+        if (['script-src', 'style-src'].indexOf(this.name) !== -1) {
+            return true
+        }
+        return false;
+    }
+
+    support_inline() {
+        if (['script-src', 'style-src'].indexOf(this.name) !== -1) {
+            return true
+        }
+        return false;
+    }
+
+    only_bolean() {
+        if ('upgrade-insecure-requests' == this.name) {
+            return true
+        }
+        return false;
+    }
+
+    static make_directive(directive_name) {
+        let directive_names = Directive.get_directive_names();
+        for (let i=0; i<directive_names.length; i++) {
+            if (directive_names[i] == directive_name) {
+                return new Directive(directive_name);
+            }
+        }
+        return null;
+    }
 }
 
 
@@ -31,7 +75,7 @@ class Policy {
     init_value(policy) {
         this.directives = [];
         let tokens = policy.split(';');
-
+        // https://www.w3.org/TR/CSP2/#policy-parsing
         for (let i=0; i<tokens.length; i++) {
             let directive_value = '';
             let chunks = tokens[i].trim().split(' ');
@@ -41,33 +85,12 @@ class Policy {
                 directive_value = chunks.slice(1).join(' ');
             }
 
-            let directive = this.make_directive(directive_name);
+            let directive = Directive.make_directive(directive_name);
             if (directive) {
                 directive.init_value(directive_value);
                 this.directives.push(directive);
             }
         }
-    }
-   
-    static get_directive_names() {
-         let directive_names = [
-            'default-src', 'script-src', 'style-src', 'img-src',
-            'connect-src', 'child-src', 'font-src', 'form-action',
-            'frame-ancestors', 'frame-src', 'media-src', 'object-src',
-            'plugin-types', 'base-uri', 'sandbox', 'report-uri'
-            ];
-
-        return directive_names;
-    }
-
-    make_directive(directive_name) {
-        let directive_names = Policy.get_directive_names();
-        for (let i=0; i<directive_names.length; i++) {
-            if (directive_names[i] == directive_name) {
-                return new Directive(directive_name);
-            }
-        }
-        return null;
     }
 
     get_string_policy() {
@@ -86,33 +109,33 @@ class Policy {
         let elems = document.getElementsByClassName("directive_value");
 
         for (let i=0; i<elems.length; i++) {
-            let directive = this.make_directive(elems[i].id);
+            let directive = Directive.make_directive(elems[i].id);
             let directive_value = elems[i].value.trim();
-            
+
             if (directive == null) {
                 continue;
             }
 
-            for (let j=0; j<keywords.length; j++) {
-                let keyword_value = get_checked(directive.name + '-' + keywords[j]);
+            for (let j=0; j<KEYWORDS.length; j++) {
+                let keyword_value = get_checked(directive.name + '-' + KEYWORDS[j]);
                 if (keyword_value) {
-                    if (keywords[j] == 'none') {
+                    if (KEYWORDS[j] == 'none') {
                         directive_value = "'none'";
                         break;
                     }
                     // Clear keyword from directive value
-                    directive_value = directive_value.replace("'" + keywords[j] + "'", ''); 
-                    directive_value += " '" + keywords[j] + "'";
+                    directive_value = directive_value.replace("'" + KEYWORDS[j] + "'", ''); 
+                    directive_value += " '" + KEYWORDS[j] + "'";
                 }
             }
-
-            if (directive_value) {
+            // TODO add support for empty values
+            if (directive_value || directive.only_bolean()) {
                 directive.init_value(directive_value);
                 this.directives.push(directive);
             }
         }
     }
- 
+
     init_from_advanced_form() {
         this.init_value(get_value("policy"));
     }
@@ -149,18 +172,8 @@ class SimpleForm {
         simple_form.removeChild(document.getElementById('tr-' + directive_name));
     }
 
-    static populate_select() {
-        let select = document.getElementById("select-directive");
-        let directive_names = Policy.get_directive_names().sort();
-        for (let i=0; i<directive_names.length; i++) {
-            let new_option = new Option(directive_names[i], directive_names[i]);
-            select.appendChild(new_option);
-        }
-    }
-
     static restore(csp) {
         SimpleForm.reset();
-        SimpleForm.populate_select();
         let tmp_value = '';
 
         for (let i=0; i<csp.directives.length; i++) {
@@ -171,12 +184,12 @@ class SimpleForm {
                 SimpleForm.add_directive(directive_name);
             }
 
-            for (let j=0; j<keywords.length; j++) {
-                if (directive_value.indexOf("'" + keywords[j] + "'") > -1 
-                        && document.getElementById(directive_name + '-' + keywords[j])) {
-                    directive_value = directive_value.replace("'" + keywords[j] +"'", ''); 
-                    set_checked(directive_name + '-' + keywords[j], true);
-                    if (keywords[j] == 'none') {
+            for (let j=0; j<KEYWORDS.length; j++) {
+                if (directive_value.indexOf("'" + KEYWORDS[j] + "'") > -1 
+                        && document.getElementById(directive_name + '-' + KEYWORDS[j])) {
+                    directive_value = directive_value.replace("'" + KEYWORDS[j] +"'", ''); 
+                    set_checked(directive_name + '-' + KEYWORDS[j], true);
+                    if (KEYWORDS[j] == 'none') {
                         check_none_box(directive_name); 
                     }
                 }
@@ -190,17 +203,7 @@ class SimpleForm {
     }
 
     static add_directive(directive_name, delete_link) {
-        if (['script-src', 'style-src'].indexOf(directive_name) !== -1) {
-            var unsafe_eval = true;
-        } else {
-            var unsafe_eval = false;
-        }
-
-        if (['script-src', 'style-src'].indexOf(directive_name) !== -1) {
-            var unsafe_inline = true;
-        } else {
-            var unsafe_inline = false;
-        }
+        var directive = new Directive(directive_name);
 
         if (delete_link === undefined) {
             var delete_link = true;
@@ -213,27 +216,37 @@ class SimpleForm {
         tr.querySelector(".help_link").innerText = directive_name;
         tr.querySelector(".directive_value").id = directive_name;
         tr.querySelector(".directive_value").value = '';
-        tr.querySelector(".directive_value").disabled = false;
 
-        let d = tr.querySelector("div.self");
-        d.querySelector("input").id = directive_name + '-self';
-        d.querySelector("input").checked = false;
-        d.querySelector("input").disabled = false;
-        d.querySelector("label").setAttribute("for", directive_name + '-self');
+        if (!directive.only_bolean()) {
+            tr.querySelector(".directive_value").disabled = false;
 
-        d = tr.querySelector("div.none");
-        d.querySelector("input").id = directive_name + '-none';
-        d.querySelector("input").checked = false;
-        d.querySelector("input").onchange = function() {check_none_box(directive_name);};
-        d.querySelector("label").setAttribute("for", directive_name + '-none');
+            let d = tr.querySelector("div.self");
+            d.style.display = 'inline';
+            d.querySelector("input").id = directive_name + '-self';
+            d.querySelector("input").checked = false;
+            d.querySelector("input").disabled = false;
+            d.querySelector("label").setAttribute("for", directive_name + '-self');
 
+            d = tr.querySelector("div.none");
+            d.style.display = 'inline';
+            d.querySelector("input").id = directive_name + '-none';
+            d.querySelector("input").checked = false;
+            d.querySelector("input").onchange = function() {check_none_box(directive_name);};
+            d.querySelector("label").setAttribute("for", directive_name + '-none');
+        } else {
+            tr.querySelector(".directive_value").disabled = true;
+            let d = tr.querySelector("div.none");
+            d.style.display = 'none';
+            d = tr.querySelector("div.self");
+            d.style.display = 'none';
+        }
         if (delete_link) {
             let d = tr.querySelector("div.delete-icon");
             d.style.display = 'inline';
             d.onclick = function() {SimpleForm.remove_directive(directive_name);return false;}
         }
 
-        if (unsafe_eval) {
+        if (directive.support_eval()) {
             let d = tr.querySelector("div.unsafe-eval");
             d.style.display = 'inline';
             d.querySelector("input").id = directive_name + '-unsafe-eval';
@@ -242,7 +255,7 @@ class SimpleForm {
             d.querySelector("label").setAttribute("for", directive_name + '-unsafe-eval');
         }
 
-        if (unsafe_inline) {
+        if (directive.support_inline()) {
             let d = tr.querySelector("div.unsafe-inline");
             d.style.display = 'inline';
             d.querySelector("input").id = directive_name + '-unsafe-inline';
@@ -427,4 +440,4 @@ document.querySelector('#simple_link').addEventListener('click', switch2simple);
 document.querySelector('#add-directive').addEventListener('click', add_directive);
 document.getElementById('default-src-none').addEventListener('change', function(){check_none_box('default-src')});
 
-toggle_view();
+switch2simple();
